@@ -1,7 +1,7 @@
 
 class DataGrid():
-    """"Objeto que armazena um datagrid de negócios
-    """"
+    """Objeto que armazena um datagrid de negócios
+    """
     def __init__(self):
         """Inicializa um DataGrid vazio
         """
