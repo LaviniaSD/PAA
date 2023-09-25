@@ -23,9 +23,12 @@ class DataGrid():
             column (str): nome da coluna que será usada para encontrar o valor a ser deletado
             value (any): valor que será usado para encontrar a linha a ser deletada
         """
+        new_list = []
         for event in self.list:
-            if getattr(event, column) == value:
-                self.list.remove(event)
+            if getattr(event, column) != value:
+                new_list.append(event)
+        self.list = new_list
+
     
 
 class Event():
@@ -39,12 +42,12 @@ class Event():
         """
         if dict == None: dict = kwargs
         
-        self.id = dict["id"][0]
-        self.owner_id = dict["owner_id"][0]
-        self.creation_date = dict["creation_date"][0]
-        self.count = dict["count"][0]
-        self.name = dict["name"][0]
-        self.content = dict["content"][0]
+        self.id = dict["id"]
+        self.owner_id = dict["owner_id"]
+        self.creation_date = dict["creation_date"]
+        self.count = dict["count"]
+        self.name = dict["name"]
+        self.content = dict["content"]
 
 if __name__ == "__main__":
      # Criar uma instância de DataGrid
@@ -52,23 +55,23 @@ if __name__ == "__main__":
 
     # Inserir evento com base em dicionário de tuplas
     data_dict = {
-        "id": (1,),
-        "owner_id": (1001,),
-        "creation_date": ("2023-09-26",),
-        "count": (43,),
-        "name": ("Evento 1",),
-        "content": ("Conteúdo do Evento 1",)
+        "id": 1,
+        "owner_id": 1001,
+        "creation_date": "2023-09-26",
+        "count": 43,
+        "name": "Evento 1",
+        "content": "Conteúdo do Evento 1"
     }
     datagrid.insert_row(data_dict)
 
     # Inserir outro evento com base em dicionário de tuplas
     data_dict2 = {
-        "id": (2,),
-        "owner_id": (1002,),
-        "creation_date": ("2023-09-26",),
-        "count": (43,),
-        "name": ("Evento 2",),
-        "content": ("Conteúdo do Evento 2",)
+        "id": 2,
+        "owner_id": 1002,
+        "creation_date": "2023-09-26",
+        "count": 43,
+        "name": "Evento 2",
+        "content": "Conteúdo do Evento 2"
     }
     datagrid.insert_row(data_dict2)
 
