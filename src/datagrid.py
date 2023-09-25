@@ -33,7 +33,7 @@ class Event():
     """
     def __init__(self, dict = None, **kwargs):
         """Inicializa um evento a partir dos dados passados nominalmente, através de um dicionário ou diretamente com keyword arguments 
-        
+   
         Args:
             dict (dict, optional): dicionário contendo dados de uma linha do DataGrid, com o nome das colunas como chaves, e as entradas do DataGrid como valores. Defaults to None.
         """
@@ -45,9 +45,6 @@ class Event():
         self.count = dict["count"][0]
         self.name = dict["name"][0]
         self.content = dict["content"][0]
-
-
-
 
 if __name__ == "__main__":
      # Criar uma instância de DataGrid
