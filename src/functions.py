@@ -20,7 +20,6 @@ def read_csv(file,separator = ","):
     linha_chave = 0
     chaves = ['id', 'owner_id', 'creation_date', 'count', 'name', 'content']
     for linha in arquivo:
-        #Criando chaves do dicionário
         if linha_chave != 0:
             #Listando os elementos de cada linha.
             linha = linha.split(separator)
@@ -30,6 +29,7 @@ def read_csv(file,separator = ","):
             linha[-1] = "".join(linha[-1])            
             dicionario = {}
             elemento = 0
+            #Criando chaves valor do dicionário
             for chave in chaves:
                 if elemento == 0 or elemento == 3:
                     dicionario[chave] = int(linha[elemento])
@@ -39,8 +39,7 @@ def read_csv(file,separator = ","):
             data_grid.insert_row(dicionario)
         linha_chave = 1
     return data_grid
-data_grid = read_csv("data\Sample.csv")
-data_grid.show()
+
 #show function
 def show(start=0,end=100):
     pass
