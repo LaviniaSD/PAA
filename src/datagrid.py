@@ -43,12 +43,17 @@ class DataGrid():
             return
 
         # Imprime o cabeçalho da tabela
-        print("{:<6} | {:<8} | {:<19} | {:<9} | {:<20} | {}".format("ID", "Owner ID", "Creation Date", "Count", "Name", "Content"))
+        print("\n{:<6} | {:<8} | {:<19} | {:<9} | {:<20} | {}".format("ID", "Owner ID", "Creation Date", "Count", "Name", "Content"))
+
+        # Imprime uma linha de separação
+        print("="*100)
 
         # Itera sobre as instâncias de Evento no DataGrid, imprimindo-as
         for event in self.list[start:end]:
             print("{:<6} | {:<8} | {:<19} | {:<9} | {:<20} | {}".format(event.id, event.owner_id, event.creation_date, event.count, event.name, event.content))
 
+        # Imprime uma linha ao final da tabela
+        print()
 class Event():
     """Objeto que armazena uma linha de um DataGrid
     """
