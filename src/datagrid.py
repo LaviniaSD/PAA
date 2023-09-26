@@ -29,7 +29,25 @@ class DataGrid():
                 new_list.append(event)
         self.list = new_list
 
-    
+    def show(self, start=0, end=100):
+        """Imprime o conteúdo do DataGrid (segundo o início e fim especificados)
+
+        Args:
+            start (int): índice inicial da impressão. 0, por padrão.
+            end (int): índice final da impressão. 100, por padrão.
+        """
+
+        # Caso o índice inicial seja maior que o tamanho da lista, ou caso o índice inicial seja igual ao índice final, não há eventos para serem impressos
+        if (start > len(self.list) or start == end):
+            print("Não há eventos para serem impressos")
+            return
+
+        # Imprime o cabeçalho da tabela
+        print("{:<6} | {:<8} | {:<19} | {:<9} | {:<20} | {}".format("ID", "Owner ID", "Creation Date", "Count", "Name", "Content"))
+
+        # Itera sobre as instâncias de Evento no DataGrid, imprimindo-as
+        for event in self.list[start:end]:
+            print("{:<6} | {:<8} | {:<19} | {:<9} | {:<20} | {}".format(event.id, event.owner_id, event.creation_date, event.count, event.name, event.content))
 
 class Event():
     """Objeto que armazena uma linha de um DataGrid
@@ -56,8 +74,8 @@ if __name__ == "__main__":
     # Inserir evento com base em dicionário de tuplas
     data_dict = {
         "id": 1,
-        "owner_id": 1001,
-        "creation_date": "2023-09-26",
+        "owner_id": 10001,
+        "creation_date": "2023-09-26 12:00:00",
         "count": 43,
         "name": "Evento 1",
         "content": "Conteúdo do Evento 1"
@@ -67,8 +85,8 @@ if __name__ == "__main__":
     # Inserir outro evento com base em dicionário de tuplas
     data_dict2 = {
         "id": 2,
-        "owner_id": 1002,
-        "creation_date": "2023-09-26",
+        "owner_id": 10002,
+        "creation_date": "2023-09-26 13:00:00",
         "count": 43,
         "name": "Evento 2",
         "content": "Conteúdo do Evento 2"
@@ -76,8 +94,8 @@ if __name__ == "__main__":
     datagrid.insert_row(data_dict2)
 
     # Verificar o conteúdo do DataGrid
-    for event in datagrid.list:
-        print(f"ID: {event.id}, Nome: {event.name}, Conteúdo: {event.content}")
+    datagrid.show()
+
         
     print("Após deletar o evento 2")
 
@@ -85,6 +103,6 @@ if __name__ == "__main__":
     datagrid.delete_row("id", 2)
 
     # Verificar o conteúdo do DataGrid
-    for event in datagrid.list:
-        print(f"ID: {event.id}, Nome: {event.name}, Conteúdo: {event.content}")
+    datagrid.show()
+
 
