@@ -79,8 +79,8 @@ if __name__ == "__main__":
     # Inserir evento com base em dicionário de tuplas
     data_dict = {
         "id": 1,
-        "owner_id": 10001,
-        "creation_date": "2023-09-26 12:00:00",
+        "owner_id": "ab123",
+        "creation_date": "2023/09/26 14:00:00",
         "count": 43,
         "name": "Evento 1",
         "content": "Conteúdo do Evento 1"
@@ -90,9 +90,9 @@ if __name__ == "__main__":
     # Inserir outro evento com base em dicionário de tuplas
     data_dict2 = {
         "id": 2,
-        "owner_id": 10002,
-        "creation_date": "2023-09-26 13:00:00",
-        "count": 43,
+        "owner_id": "ac124",
+        "creation_date": "2023/09/26 15:25:32",
+        "count": 25,
         "name": "Evento 2",
         "content": "Conteúdo do Evento 2"
     }
