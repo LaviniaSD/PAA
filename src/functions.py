@@ -37,7 +37,8 @@ def read_csv(file,separator = ","):
                     dicionario[chave] = linha[elemento]
                 elemento += 1
             data_grid.insert_row(dicionario)
-        linha_chave = 1
+        else:
+            linha_chave = 1
     return data_grid
 
 #show function
