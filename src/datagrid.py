@@ -19,7 +19,8 @@ class DataGrid():
         """Inicializa um DataGrid vazio
         """
         self.list = []
-        self.ordered = False
+        self.ordered_by = None
+        self.size = 0
 
     def insert_row(self, row):
         """Insere uma linha no DataGrid
@@ -29,6 +30,8 @@ class DataGrid():
         """
         event = Event(**row)
         self.list.append(event)
+        self.size += 1
+        self.ordered_by = None
     
     def delete_row(self, column, value):
         """Deleta uma linha do DataGrid
@@ -38,9 +41,13 @@ class DataGrid():
             value (any): valor que será usado para encontrar a linha a ser deletada
         """
         new_list = []
+        self.size = 0
+
         for event in self.list:
             if getattr(event, column) != value:
                 new_list.append(event)
+                self.size += 1
+        
         self.list = new_list
         
     def show(self, start=0, end=100):
@@ -191,16 +198,32 @@ class DataGrid():
     #   if column == "ID" or column == "Count":
     #        return self.__quick_sort(column, direction)
 
+    def __binary_search(self, column, value):
+        # Busca binária para variáveis numéricas
+        start = 0
+        end = self.size - 1
+        mid = int(end/2)
+
+        while start != end: 
+            if getattr(self.list[mid], column) == value: return mid
+        
+            if getattr(self.list[mid], column) < value: start = mid
+            else: end = mid
+
+            mid = int(start + (end - start)/2)
+        
+        return None
+
     def __exact_search(self, column, value):
-        # Se estiver ordenado, podemos implementar uma binary search
-        if self.ordered: 
-            pass
+        # Se estiver ordenado pela coluna que estamos buscando, implementa a binary search
+        if self.ordered_by == column:
+            return self.__binary_search(column, value)
 
         # Se não, faça uma busca linear
         else:
-            for event in self.list:
-                if getattr(event, column) == value:
-                    return event
+            for idx in range(self.size):
+                if getattr(self.list[idx], column) == value:
+                    return idx
                 
         return None
 
@@ -209,13 +232,18 @@ class DataGrid():
 
         # if column == "creation_date":
             
-
-
     # def __contain_search(self, column, value):
 
     def search(self, column, value):
         if column == "id" or column == "owner_id":
-            return self.__exact_search(column, value)
+            idx = self.__exact_search(column, value)
+            
+            if idx == None: return None
+
+            result = DataGrid()
+            result.list.append(self.list[idx])
+            result.size += 1
+            return result
 
         # elif column == "creation_date" or column == "count":
         #     return self.__interval_search(column, value)
@@ -299,4 +327,9 @@ if __name__ == "__main__":
     # Verificar o conteúdo do DataGrid
     datagrid.show()
 
+    print("Reinserindo evento 2 e buscando por owner_id do evento 1")
+    
+    # Buscar por elemento
+    datagrid.insert_row(data_dict2)
+    datagrid.search("owner_id", "ab123").show()
 
