@@ -1,7 +1,7 @@
 import datagrid
 
 #read_csv function  
-def read_csv(file,separator = ","):
+def read_csv(file,separator = ",",encoding="utf-8"):
     """
     Transforma um csv em um datagrid.
     
@@ -14,7 +14,7 @@ def read_csv(file,separator = ","):
     Returns:
         DataGrid: datagrid com os valores do csv
     """
-    arquivo = open(file,"r")
+    arquivo = open(file,"r",encoding)
     data_grid = datagrid.DataGrid()
     #Verificando que não estamos na linha com os nomes da coluna do csv.
     linha_chave = 0
@@ -56,5 +56,3 @@ def sort(column, direction='asc'):
 #select count function
 def select_count(i,j):
     pass
-
-
