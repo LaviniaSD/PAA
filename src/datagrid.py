@@ -179,7 +179,6 @@ class DataGrid():
     #   if column == "ID" or column == "Count":
     #        return self.__quick_sort(column, direction)
         
-=======
     def __exact_search(self, column, value):
         # Se estiver ordenado, podemos implementar uma binary search
         if self.ordered: 
