@@ -1,3 +1,4 @@
+from datetime import datetime
 
 class DataGrid():
     """Objeto que armazena um datagrid de negócios
@@ -56,20 +57,29 @@ class DataGrid():
         # Imprime uma linha ao final da tabela
         print()
 
+    def __date_to_timestamp(self, date_str):
+        dtime = datetime.strptime(date_str, "%Y/%m/%d %H:%M:%S")
+        return dtime.timestamp()
+
     def __exact_search(self, column, value):
         # Se estiver ordenado, podemos implementar uma binary search
         if self.ordered: 
             pass
 
-        # Se estiver desordenado, implementamos uma busca linear
+        # Se não, faça uma busca linear
         else:
             for event in self.list:
                 if getattr(event, column) == value:
                     return event
                 
-            return None
+        return None
 
     # def __interval_search(self, column, value):
+    #     start, end = value
+
+        # if column == "creation_date":
+            
+
 
     # def __contain_search(self, column, value):
 
