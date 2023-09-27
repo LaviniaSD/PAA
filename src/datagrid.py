@@ -133,9 +133,13 @@ class DataGrid():
                 min_inx = i
                 # Iniciando loop interno
                 for j in range(i+1,n):
-                    if self.list[j] < self.list[min_inx]:
-                        min_inx = j
-                self.list.swap_row(i, min_inx)
+                    if column == "ID":
+                        if self.list[j].id < self.list[min_inx].id:
+                            min_inx = j
+                    elif column == "Count":
+                        if self.list[j].count < self.list[min_inx].count:
+                            min_inx = j
+                self.swap_row(i, min_inx)
         # Ordenanado em ordem decrescente
         if direction == "desc":
             # Iniciando loop externo
@@ -143,9 +147,13 @@ class DataGrid():
                 max_inx = i
                 # Iniciando loop interno
                 for j in range(i+1,n):
-                    if self.list[j] > self.list[max_inx]:
-                        max_inx = j
-                self.list.swap_row(i, max_inx)     
+                    if column == "ID":
+                        if self.list[j].id > self.list[max_inx].id:
+                            max_inx = j
+                    elif column == "Count":
+                        if self.list[j].count > self.list[max_inx].count:
+                            max_inx = j
+                self.swap_row(i, max_inx)     
 
     # def __quick_sort(self, column, direction="asc")
             #int
@@ -227,6 +235,11 @@ if __name__ == "__main__":
 
     datagrid.show()
 
+    print("Ordenando de forma decrescente DataGrid pela coluna ID com Selection Sort")
+    datagrid.selection_sort("ID", "desc")
+
+    datagrid.show()
+    
     print("Após deletar o evento 2")
 
     # Deletar um evento
