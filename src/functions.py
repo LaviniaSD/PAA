@@ -1,7 +1,7 @@
 import datagrid
 
 #read_csv function  
-def read_csv(file,separator = ",",encoding="utf-8"):
+def read_csv(file,separator = ",",encoding = "utf-8"):
     """
     Transforma um csv em um datagrid.
     
@@ -10,37 +10,36 @@ def read_csv(file,separator = ",",encoding="utf-8"):
     Args:
         file (str): documento csv com primeira linha "id,owner_id,creation_date,count,name,content"
         separator (str, optional): separador do csv. Defaults to ","
-
+        encoding (str, optional): codificação do arquivo. Defaults to "utf-8"
     Returns:
         DataGrid: datagrid com os valores do csv
     """
-    arquivo = open(file,"r",encoding)
+    file = open(file, mode = "r", encoding = encoding)
     data_grid = datagrid.DataGrid()
-    #Verificando que não estamos na linha com os nomes da coluna do csv.
-    linha_chave = 0
-    chaves = ['id', 'owner_id', 'creation_date', 'count', 'name', 'content']
-    for linha in arquivo:
-        if linha_chave != 0:
-            #Listando os elementos de cada linha.
-            linha = linha.split(separator)
-            #Retirando o "\n" no final do último elementod a lista.
-            linha[-1] = list(linha[-1])
-            linha[-1] = linha[-1][:-1]
-            linha[-1] = "".join(linha[-1])            
-            dicionario = {}
-            elemento = 0
-            #Criando chaves valor do dicionário
-            for chave in chaves:
-                if elemento == 0 or elemento == 3:
-                    dicionario[chave] = int(linha[elemento])
+    # Verificando que não estamos na linha com os nomes da coluna do csv.
+    key_row = 0
+    keys = ['id', 'owner_id', 'creation_date', 'count', 'name', 'content']
+    for row in file:
+        if key_row != 0:
+            # Listando os elementos de cada linha.
+            row = row.split(separator)
+            # Retirando o "\n" no final do último elementod a lista.
+            row[-1] = row[-1].rstrip('\n')           
+            dictionary = {}
+            element = 0
+            # Criando chaves valor do dicionário
+            for key in keys:
+                # Corrigindo o tipo de dado
+                if element == 0 or element == 3:
+                    dictionary[key] = int(row[element])
                 else:
-                    dicionario[chave] = linha[elemento]
-                elemento += 1
-            data_grid.insert_row(dicionario)
+                    dictionary[key] = row[element]
+                element += 1
+            data_grid.insert_row(dictionary)
         else:
-            linha_chave = 1
+            key_row = 1
     return data_grid
-
+read_csv("data\sample.csv").show()
 #show function
 def show(start=0,end=100):
     pass
