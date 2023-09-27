@@ -1,5 +1,17 @@
 from datetime import datetime
 
+def date_to_timestamp(date_str):
+    """Converte a data no padrão de um objeto Event para uma timestamp.
+
+    Args:
+        date_str (str): String padrão de um Event.creation_date
+
+    Returns:
+        float: Timestamp converted from passed string
+    """
+    dtime = datetime.strptime(date_str, "%Y/%m/%d %H:%M:%S")
+    return dtime.timestamp()
+
 class DataGrid():
     """Objeto que armazena um datagrid de negócios
     """
@@ -7,7 +19,8 @@ class DataGrid():
         """Inicializa um DataGrid vazio
         """
         self.list = []
-        self.ordered = False
+        self.ordered_by = None
+        self.size = 0
 
     def insert_row(self, row):
         """Insere uma linha no DataGrid
@@ -17,6 +30,8 @@ class DataGrid():
         """
         event = Event(**row)
         self.list.append(event)
+        self.size += 1
+        self.ordered_by = None
     
     def delete_row(self, column, value):
         """Deleta uma linha do DataGrid
@@ -26,9 +41,13 @@ class DataGrid():
             value (any): valor que será usado para encontrar a linha a ser deletada
         """
         new_list = []
+        self.size = 0
+
         for event in self.list:
             if getattr(event, column) != value:
                 new_list.append(event)
+                self.size += 1
+        
         self.list = new_list
         
     def show(self, start=0, end=100):
@@ -118,6 +137,7 @@ class DataGrid():
                         # Atualizando j
                         j -= 1
                 self.list[j+1] = current_value
+    
     def selection_sort(self, column, direction="asc"):
         """
         Ordena o DataGrid usando o algoritmo de ordenação por seleção.
@@ -128,7 +148,7 @@ class DataGrid():
         """
         # Tamanho da entrada
         n = len(self.list)
-        # Ordenanado em ordem crescente
+        # Ordenando em ordem crescente
         if direction == "asc":
             # Iniciando loop externo
             for i in range(n-1):
@@ -142,7 +162,7 @@ class DataGrid():
                         if self.list[j].count < self.list[min_inx].count:
                             min_inx = j
                 self.swap_row(i, min_inx)
-        # Ordenanado em ordem decrescente
+        # Ordenando em ordem decrescente
         if direction == "desc":
             # Iniciando loop externo
             for i in range(n-1):
@@ -174,49 +194,169 @@ class DataGrid():
     # def __heap_sort(self, column, direction="asc")
             #
 
-
     #def sort(self, column, direction="asc"):
     #   if column == "ID" or column == "Count":
     #        return self.__quick_sort(column, direction)
+
+    def __exact_binary_search(self, column, value):
+        # Busca binária para variáveis numéricas
+        start = 0
+        end = self.size - 1
+        mid = int(end/2)
+
+        while start != end: 
+            if getattr(self.list[mid], column) == value: return mid # Foi encontrado
         
-    def __date_to_timestamp(self, date_str):
-        dtime = datetime.strptime(date_str, "%Y/%m/%d %H:%M:%S")
-        return dtime.timestamp()
+            if getattr(self.list[mid], column) < value: start = mid
+            else: end = mid
+
+            mid = int(start + (end - start)/2)
+        
+        return None # Não foi encontrado
 
     def __exact_search(self, column, value):
-        # Se estiver ordenado, podemos implementar uma binary search
-        if self.ordered: 
-            pass
+        # Se estiver ordenado pela coluna que estamos buscando, implementa a binary search
+        if self.ordered_by == column:
+            return self.__exact_binary_search(column, value)
 
         # Se não, faça uma busca linear
-        else:
-            for event in self.list:
-                if getattr(event, column) == value:
-                    return event
-                
+        for idx in range(self.size):
+            if getattr(self.list[idx], column) == value:
+                return idx
+        
+        # Pior caso: não foi encontrado
         return None
 
-    # def __interval_search(self, column, value):
-    #     start, end = value
+    def __interval_binary_search(self, column, value):
+        # Casos em que é impossível o intervalo existir no datagrid
+        if getattr(self.list[self.size-1], column) < value[0] or getattr(self.list[0], column) > value[1]: return []
 
-        # if column == "creation_date":
+        # Se procurar por data, usa timestamp ao invés da string
+        if column == "creation_date": 
+            column = "timestamp"
+            value[0], value[1] = date_to_timestamp(value[0]), date_to_timestamp(value[1]) 
+        
+        start = 0
+        end = self.size - 1
+        mid = int(end/2)
+
+        # Loop para encontrar o limite inferior
+        while start != end: 
+            cur_val = getattr(self.list[mid], column)
+
+            # Se encontramos exatamente o limite inferior do intervalo, garantimos que abrangimos todas as suas duplicatas e quebramos o loop
+            if cur_val == value[0]: 
+                while getattr(self.list[mid-1], column) == value[0]: mid -= 1
+                break
             
+            if cur_val < value[0]: start = mid
+            else: end = mid
 
+            mid = int(start + (end - start)/2)
 
-    # def __contain_search(self, column, value):
+        if getattr(self.list[mid], column) < value[0]: mid += 1
+        if getattr(self.list[mid], column) > value[1]: return [] # Caso em que o intervalo não existe
+
+        # Nesse momento, mid é o índice do primeiro elemento do grid que pertence ao intervalo
+        first = mid
+
+        start = first # Não precisamos procurar o limite superior do intervalo antes do inferior
+        end = self.size - 1
+        mid = int(end/2)
+
+        # Loop para encontrar o limite superior
+        while start != end:
+            cur_val = getattr(self.list[mid], column)
+
+            # Se encontramos exatamente o limite superior do intervalo, garantimos que abrangimos todas as suas duplicatas e quebramos o loop
+            if cur_val == value[1]: 
+                while getattr(self.list[mid+1], column) == value[1]: mid += 1
+                break
+            
+            if cur_val < value[1]: start = mid
+            else: end = mid
+
+            mid = int(start + (end - start)/2)
+
+        if getattr(self.list[mid], column) > value[1]: mid -= 1
+        # Nesse momento, mid é o índice do último elemento do grid que pertence ao intervalo
+        last = mid
+
+        return range(first, last+1)
+
+    def __interval_search(self, column, value):
+        # Busca binária caso esteja ordenado
+        if self.ordered_by == column:
+            return self.__interval_binary_search(column, value)
+        
+        # Se procurar por data, usa timestamp ao invés da string
+        if column == "creation_date": 
+            column = "timestamp"
+            value = (date_to_timestamp(value[0]), date_to_timestamp(value[1])) 
+        
+        start, end = value        
+        result = []
+        for idx in range(self.size):
+            cur_val = getattr(self.list[idx], column)
+            if cur_val >= start and cur_val <= end:
+                result.append(idx)
+        return result
+    
+    def __contain(self, str1, str2, str_len):
+        matches = 0
+        for i in range(len(str1)):
+            if str1[i] == str2[matches]:
+                matches += 1
+            else:
+                matches = 0
+            
+            if matches == str_len: 
+                return True
+        return False
+
+    def __contain_search(self, column, value):
+        lenght = len(value)     
+        result = []
+
+        for idx in range(self.size):
+            if self.__contain(getattr(self.list[idx], column), value, lenght):
+                result.append(idx)
+        return result
 
     def search(self, column, value):
+        # Busca exata
         if column == "id" or column == "owner_id":
-            return self.__exact_search(column, value)
+            idx = self.__exact_search(column, value)
+            
+            if idx == None: return None
 
-        # elif column == "creation_date" or column == "count":
-        #     return self.__interval_search(column, value)
+            result = DataGrid()
+            result.list.append(self.list[idx])
+            result.size += 1
+            return result
+
+        # Busca por intervalo
+        elif column == "creation_date" or column == "count":
+            idx_list = self.__interval_search(column, value)
+            if len(idx_list) > 0:
+                result = DataGrid()
+                for i in idx_list:
+                    result.list.append(self.list[i])
+                    result.size += 1
+                return result
         
-        # elif column == "name" or column == "content":
-        #     return self.__contain_search(column, value)
+        # Busca por conteúdo
+        elif column == "name" or column == "content":
+            idx_list = self.__contain_search(column, value)
+            
+            if len(idx_list) > 0:
+                result = DataGrid()
+                for i in idx_list:
+                    result.list.append(self.list[i])
+                    result.size += 1
+                return result
 
-        return None
-
+        return None # Pior caso: busca não encontrou nada
 
 class Event():
     """Objeto que armazena uma linha de um DataGrid
@@ -235,6 +375,9 @@ class Event():
         self.count = dict["count"]
         self.name = dict["name"]
         self.content = dict["content"]
+
+        # Coluna oculta para fins de ordenação
+        self.timestamp = date_to_timestamp(self.creation_date)
 
 if __name__ == "__main__":
      # Criar uma instância de DataGrid
@@ -288,5 +431,28 @@ if __name__ == "__main__":
 
     # Verificar o conteúdo do DataGrid
     datagrid.show()
+
+    print("Reinserindo evento 2 e buscando por owner_id do evento 1")
+    
+    # Buscar por elemento
+    datagrid.insert_row(data_dict2)
+    datagrid.search("owner_id", "ab123").show()
+
+    print("Buscando por conteúdo")
+    
+    # Buscar por strings que contém outra    
+    datagrid.search("content", "Conteúdo").show()
+    datagrid.search("name", "2").show()
+
+    print("Buscando por count entre 25 e 43")
+    
+    # Buscar por intervalo    
+    datagrid.search("count", (25,43)).show()
+    
+    print("Buscando por data entre 2023/09/26 14:00:01 e 2023/09/26 17:00:00")
+    
+    # Buscar por intervalo
+    datagrid.search("creation_date", ("2023/09/26 14:00:01", "2023/09/26 17:00:00")).show()
+
 
 
