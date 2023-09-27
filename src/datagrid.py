@@ -6,6 +6,7 @@ class DataGrid():
         """Inicializa um DataGrid vazio
         """
         self.list = []
+        self.ordered = False
 
     def insert_row(self, row):
         """Insere uma linha no DataGrid
@@ -54,6 +55,7 @@ class DataGrid():
 
         # Imprime uma linha ao final da tabela
         print()
+
 
     def swap_row(self, row_1, row_2):
         """
@@ -177,6 +179,37 @@ class DataGrid():
     #   if column == "ID" or column == "Count":
     #        return self.__quick_sort(column, direction)
         
+=======
+    def __exact_search(self, column, value):
+        # Se estiver ordenado, podemos implementar uma binary search
+        if self.ordered: 
+            pass
+
+        # Se estiver desordenado, implementamos uma busca linear
+        else:
+            for event in self.list:
+                if getattr(event, column) == value:
+                    return event
+                
+            return None
+
+    # def __interval_search(self, column, value):
+
+    # def __contain_search(self, column, value):
+
+    def search(self, column, value):
+        if column == "id" or column == "owner_id":
+            return self.__exact_search(column, value)
+
+        # elif column == "creation_date" or column == "count":
+        #     return self.__interval_search(column, value)
+        
+        # elif column == "name" or column == "content":
+        #     return self.__contain_search(column, value)
+
+        return None
+
+
 class Event():
     """Objeto que armazena uma linha de um DataGrid
     """
