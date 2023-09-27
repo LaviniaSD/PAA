@@ -9,6 +9,59 @@ class DataGrid():
         self.list = []
         self.ordered = False
 
+    def read_csv(self, filepath, separator=",",encoding="utf-8"):
+        """Carrega os dados de um arquivo CSV para o DataGrid
+
+        Args:
+            filepath (str): caminho para o arquivo CSV
+            separator (str, optional): separador do CSV. Defaults to ",".
+            encoding (str, optional): codificação do arquivo. Defaults to "utf-8".
+        
+        """
+
+        # Abrindo o arquivo CSV
+        try:
+            file = open(filepath, mode="r", encoding=encoding)
+
+        except FileNotFoundError:
+            print("Arquivo não encontrado. Por favor, verifique o caminho e tente novamente.")
+
+        except OSError:
+            print("Ocorreu um erro ao abrir o arquivo. Por favor, verifique o caminho e tente novamente.")
+
+        except Exception as error:
+            print("Ocorreu um erro inesperado ao abrir o arquivo. Por favor, verifique o caminho e tente novamente.")
+            print("Erro:", error)
+
+        else:
+            key_row = 0
+            keys = ['id', 'owner_id', 'creation_date', 'count', 'name', 'content']
+
+            for row in file:
+                # Verificando que não estamos no cabeçalho (linha com os nomes da coluna) do csv.
+                if key_row != 0:
+                    # Listando os elementos de cada linha.
+                    row = row.split(separator)
+                    # Retirando o "\n" no final do último elementod a lista.
+                    row[-1] = row[-1].rstrip('\n')
+                    
+                    row_dict = dict()
+                    field_index = 0
+                    # Criando chaves valor do dicionário
+                    for key in keys:
+                        # Corrigindo o tipo de dado
+                        if field_index == 0 or field_index == 3:
+                            row_dict[key] = int(row[field_index])
+                        else:
+                            row_dict[key] = row[field_index]
+                        
+                        field_index += 1
+                        
+                    self.insert_row(row_dict)
+                else:
+                    # Caso estejamos no cabeçalho, avançe para a primeira linha de dados
+                    key_row = 1
+
     def insert_row(self, row):
         """Insere uma linha no DataGrid
 
@@ -289,4 +342,7 @@ if __name__ == "__main__":
     # Verificar o conteúdo do DataGrid
     datagrid.show()
 
-
+    # Carregando dados a partir de um CSV
+    datagrid_csv = DataGrid()
+    datagrid_csv.read_csv("data/sample.csv")
+    datagrid_csv.show()
