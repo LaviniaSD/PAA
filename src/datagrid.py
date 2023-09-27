@@ -224,15 +224,35 @@ class DataGrid():
             for idx in range(self.size):
                 if getattr(self.list[idx], column) == value:
                     return idx
-                
-        return None
+            
+            return None
 
     # def __interval_search(self, column, value):
     #     start, end = value
 
         # if column == "creation_date":
+    
+    def __contain(self, str1, str2, str_len):
+        matches = 0
+        for i in range(len(str1)):
+            if str1[i] == str2[matches]:
+                matches += 1
+            else:
+                matches = 0
             
-    # def __contain_search(self, column, value):
+            if matches == str_len: 
+                return True
+        return False
+
+    def __contain_search(self, column, value):
+        lenght = len(value)     
+        result = []
+
+        for idx in range(self.size):
+            if self.__contain(getattr(self.list[idx], column), value, lenght):
+                result.append(idx)
+        
+        return result
 
     def search(self, column, value):
         if column == "id" or column == "owner_id":
@@ -248,11 +268,17 @@ class DataGrid():
         # elif column == "creation_date" or column == "count":
         #     return self.__interval_search(column, value)
         
-        # elif column == "name" or column == "content":
-        #     return self.__contain_search(column, value)
+        elif column == "name" or column == "content":
+            idx_list = self.__contain_search(column, value)
+            
+            if len(idx_list) > 0:
+                result = DataGrid()
+                for i in idx_list:
+                    result.list.append(self.list[i])
+                    result.size += 1
+                return result
 
         return None
-
 
 class Event():
     """Objeto que armazena uma linha de um DataGrid
@@ -332,4 +358,12 @@ if __name__ == "__main__":
     # Buscar por elemento
     datagrid.insert_row(data_dict2)
     datagrid.search("owner_id", "ab123").show()
+
+    
+    print("Buscando por conteúdo")
+    
+    # Buscar por elemento
+    datagrid.search("content", "Conteúdo").show()
+    datagrid.search("name", "2").show()
+
 
