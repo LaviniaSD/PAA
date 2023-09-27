@@ -55,44 +55,97 @@ class DataGrid():
         # Imprime uma linha ao final da tabela
         print()
 
-    def __insertion_sort(self, column, direction="asc"):
+    def swap_row(self, row_1, row_2):
+        """
+        Troca duas linhas na lista do DataGrid com base nos índices fornecidos.
+
+        Args:
+            row_1 (int): O índice da primeira linha a ser trocada.
+            row_2 (int): O índice da segunda linha a ser trocada.
+        """
+        # Verifica se os índices são válidos
+        if 0 <= row_1 < len(self.list) and 0 <= row_2 < len(self.list):
+            # Troca os elementos
+            self.list[row_1], self.list[row_2] = self.list[row_2], self.list[row_1]
+        else:
+            print("Índices fora dos limites da lista")
+
+    def insertion_sort(self, column, direction="asc"):
         """
         Ordena um datagrid usando o algoritmo de ordenação por inserção.
 
         Args:
             column (str): O nome da coluna pela qual o datagrid será ordenado.
             direction (str, optional): A direção da ordenação, "asc" para ascendente (padrão) ou "desc" para descendente.
-
         """
-        # tamanho da entrada
+        # Tamanho da entrada
         n = len(self.list)
         # Ordenanado em ordem crescente
         if direction == "asc":
             # Iniciando loop externo
             for i in range(1,n):
-              current_value = self.list[i][column]
-              j = i-1
-              # Iniciando loop interno
-              while (self.list[j] > current_value) and (j >= 0) :
-                self.list[j+1][column] = self.list[j][column]
-                # Atualizando j
-                j -= 1
-              self.list[j+1][column] = current_value
+                current_value = self.list[i]
+                j = i-1
+                # Iniciando loop interno
+                if column == "ID":    
+                    while (self.list[j].id > current_value.id) and (j >= 0) :
+                        self.list[j+1] = self.list[j]
+                        # Atualizando j
+                        j -= 1
+                elif column == "Count":
+                    while (self.list[j].count > current_value.count) and (j >= 0) :
+                        self.list[j+1] = self.list[j]
+                        # Atualizando j
+                        j -= 1
+                self.list[j+1] = current_value
         # Ordenanado em ordem decrescente
         elif direction == "desc":
             # Iniciando loop externo
             for i in range(1,n):
-              current_value= self.list[i][column]
-              j = i-1
-              # Iniciando loop interno
-              while (self.list[j] <= current_value) and (j >= 0) :
-                self.list[j+1][column] = self.list[j][column]
-                # Atualizando j
-                j -= 1
-              self.list[j+1][column] = current_value
+                current_value = self.list[i]
+                j = i-1
+                # Iniciando loop interno
+                if column == "ID":    
+                    while (self.list[j].id < current_value.id) and (j >= 0) :
+                        self.list[j+1] = self.list[j]
+                        # Atualizando j
+                        j -= 1
+                elif column == "Count":
+                    while (self.list[j].count < current_value.count) and (j >= 0) :
+                        self.list[j+1] = self.list[j]
+                        # Atualizando j
+                        j -= 1
+                self.list[j+1] = current_value
+    def selection_sort(self, column, direction="asc"):
+        """
+        Ordena o DataGrid usando o algoritmo de ordenação por seleção.
 
-    # def __selection_sort(self, column, direction="asc")
-            #int
+        Args:
+            column (str): O nome da coluna pela qual o DataGrid será ordenado.
+            direction (str, optional): A direção da ordenação, "asc" para ascendente (padrão) ou "desc" para descendente.
+        """
+        # Tamanho da entrada
+        n = len(self.list)
+        # Ordenanado em ordem crescente
+        if direction == "asc":
+            # Iniciando loop externo
+            for i in range(n-1):
+                min_inx = i
+                # Iniciando loop interno
+                for j in range(i+1,n):
+                    if self.list[j] < self.list[min_inx]:
+                        min_inx = j
+                self.list.swap_row(i, min_inx)
+        # Ordenanado em ordem decrescente
+        if direction == "desc":
+            # Iniciando loop externo
+            for i in range(n-1):
+                max_inx = i
+                # Iniciando loop interno
+                for j in range(i+1,n):
+                    if self.list[j] > self.list[max_inx]:
+                        max_inx = j
+                self.list.swap_row(i, max_inx)     
 
     # def __quick_sort(self, column, direction="asc")
             #int
@@ -163,7 +216,17 @@ if __name__ == "__main__":
     # Verificar o conteúdo do DataGrid
     datagrid.show()
 
-        
+    print("Após trocar linha 1 com linha 2")
+    # Trocar linha 1 com linha 2
+    datagrid.swap_row(0,1)
+
+    datagrid.show()
+
+    print("Ordenando DataGrid pela coluna ID com Insertion Sort")
+    datagrid.insertion_sort("ID")
+
+    datagrid.show()
+
     print("Após deletar o evento 2")
 
     # Deletar um evento
