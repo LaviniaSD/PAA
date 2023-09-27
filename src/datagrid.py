@@ -28,7 +28,7 @@ class DataGrid():
             if getattr(event, column) != value:
                 new_list.append(event)
         self.list = new_list
-
+        
     def show(self, start=0, end=100):
         """Imprime o conteúdo do DataGrid (segundo o início e fim especificados)
 
@@ -54,6 +54,68 @@ class DataGrid():
 
         # Imprime uma linha ao final da tabela
         print()
+
+    def __insertion_sort(self, column, direction="asc"):
+        """
+        Ordena um datagrid usando o algoritmo de ordenação por inserção.
+
+        Args:
+            column (str): O nome da coluna pela qual o datagrid será ordenado.
+            direction (str, optional): A direção da ordenação, "asc" para ascendente (padrão) ou "desc" para descendente.
+
+        """
+        # tamanho da entrada
+        n = len(self.list)
+        # Ordenanado em ordem crescente
+        if direction == "asc":
+            # Iniciando loop externo
+            for i in range(1,n):
+              current_value = self.list[i][column]
+              j = i-1
+              # Iniciando loop interno
+              while (self.list[j] > current_value) and (j >= 0) :
+                self.list[j+1][column] = self.list[j][column]
+                # Atualizando j
+                j -= 1
+              self.list[j+1][column] = current_value
+        # Ordenanado em ordem decrescente
+        elif direction == "desc":
+            # Iniciando loop externo
+            for i in range(1,n):
+              current_value= self.list[i][column]
+              j = i-1
+              # Iniciando loop interno
+              while (self.list[j] <= current_value) and (j >= 0) :
+                self.list[j+1][column] = self.list[j][column]
+                # Atualizando j
+                j -= 1
+              self.list[j+1][column] = current_value
+
+    # def __selection_sort(self, column, direction="asc")
+            #int
+
+    # def __quick_sort(self, column, direction="asc")
+            #int
+
+    # def __merge_sort(self, column, direction="asc")
+            #
+
+    # def __radix_sort(self, column, direction="asc") 
+            #owner
+
+    # def __radix_sort_2(self, column, direction="asc")
+            #name, content
+
+    # def __radix_sort_3(self, column, direction="asc")
+            #date
+    # def __heap_sort(self, column, direction="asc")
+            #
+
+
+    #def sort(self, column, direction="asc"):
+    #   if column == "ID" or column == "Count":
+    #        return self.__quick_sort(column, direction)
+        
 class Event():
     """Objeto que armazena uma linha de um DataGrid
     """

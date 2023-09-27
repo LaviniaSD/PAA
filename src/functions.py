@@ -39,7 +39,7 @@ def read_csv(file,separator = ",",encoding = "utf-8"):
         else:
             key_row = 1
     return data_grid
-read_csv("data\sample.csv").show()
+
 #show function
 def show(start=0,end=100):
     pass
