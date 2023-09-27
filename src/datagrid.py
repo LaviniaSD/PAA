@@ -1,5 +1,17 @@
 from datetime import datetime
 
+def date_to_timestamp(date_str):
+    """Converte a data no padrão de um objeto Event para uma timestamp.
+
+    Args:
+        date_str (str): String padrão de um Event.creation_date
+
+    Returns:
+        float: Timestamp converted from passed string
+    """
+    dtime = datetime.strptime(date_str, "%Y/%m/%d %H:%M:%S")
+    return dtime.timestamp()
+
 class DataGrid():
     """Objeto que armazena um datagrid de negócios
     """
@@ -118,6 +130,7 @@ class DataGrid():
                         # Atualizando j
                         j -= 1
                 self.list[j+1] = current_value
+    
     def selection_sort(self, column, direction="asc"):
         """
         Ordena o DataGrid usando o algoritmo de ordenação por seleção.
@@ -174,14 +187,9 @@ class DataGrid():
     # def __heap_sort(self, column, direction="asc")
             #
 
-
     #def sort(self, column, direction="asc"):
     #   if column == "ID" or column == "Count":
     #        return self.__quick_sort(column, direction)
-        
-    def __date_to_timestamp(self, date_str):
-        dtime = datetime.strptime(date_str, "%Y/%m/%d %H:%M:%S")
-        return dtime.timestamp()
 
     def __exact_search(self, column, value):
         # Se estiver ordenado, podemos implementar uma binary search
@@ -235,6 +243,8 @@ class Event():
         self.count = dict["count"]
         self.name = dict["name"]
         self.content = dict["content"]
+
+        self.timestamp = date_to_timestamp(self.creation_date)
 
 if __name__ == "__main__":
      # Criar uma instância de DataGrid
