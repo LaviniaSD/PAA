@@ -90,6 +90,8 @@ class DataGrid():
             self.list[row_1], self.list[row_2] = self.list[row_2], self.list[row_1]
         else:
             print("Índices fora dos limites da lista")
+        
+        if self.ordered_by: self.ordered_by = None 
 
     def insertion_sort(self, column, direction="asc"):
         """
@@ -100,7 +102,7 @@ class DataGrid():
             direction (str, optional): A direção da ordenação, "asc" para ascendente (padrão) ou "desc" para descendente.
         """
         # Tamanho da entrada
-        n = len(self.list)
+        n = self.size
         # Ordenanado em ordem crescente
         if direction == "asc":
             # Iniciando loop externo
@@ -137,6 +139,7 @@ class DataGrid():
                         # Atualizando j
                         j -= 1
                 self.list[j+1] = current_value
+        self.ordered_by = column
     
     def selection_sort(self, column, direction="asc"):
         """
@@ -176,7 +179,8 @@ class DataGrid():
                         if self.list[j].count > self.list[max_inx].count:
                             max_inx = j
                 self.swap_row(i, max_inx)     
-
+        self.ordered_by = column
+        
     # def __quick_sort(self, column, direction="asc")
             #int
 
