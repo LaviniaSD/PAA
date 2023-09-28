@@ -11,8 +11,7 @@ from nltk.corpus import words
 
 # Função auxiliar para gerar conteúdo com palavras aleatórias
 def gerar_conteudo_com_palavras_aleatorias(num_palavras):
-    """
-    Gera conteúdo com palavras aleatórias.
+    """Gera conteúdo com palavras aleatórias.
     
     Args:
         num_palavras (int): O número de palavras no conteúdo.
@@ -33,8 +32,7 @@ def gerar_conteudo_com_palavras_aleatorias(num_palavras):
 
 # Função auxiliar para gerar uma data e hora aleatória
 def gerar_data_hora_aleatoria():
-    """
-    Gera uma data e hora aleatória.
+    """Gera uma data e hora aleatória.
 
     Returns:
         datetime: Uma data e hora aleatória.
@@ -51,8 +49,7 @@ def gerar_data_hora_aleatoria():
 
 # Função auxiliar para gerar dados de exemplo
 def gerar_dados(num_linhas):
-    """
-    Gera dados de exemplo.
+    """Gera dados de exemplo.
 
     Args:
         num_linhas (int): O número de linhas de dados a serem geradas.
@@ -91,8 +88,7 @@ def gerar_dados(num_linhas):
     return pd.DataFrame(dados)
 
 def criar_arquivo_csv(nome_arquivo, dados, separador=','):
-    """
-    Cria um arquivo CSV a partir dos dados fornecidos.
+    """Cria um arquivo CSV a partir dos dados fornecidos.
 
     Args:
         nome_arquivo (str): O nome do arquivo CSV a ser criado.
