@@ -12,6 +12,28 @@ def date_to_timestamp(date_str):
     dtime = datetime.strptime(date_str, "%Y/%m/%d %H:%M:%S")
     return dtime.timestamp()
 
+def string_lesser(str1, str2, lenght1, lenght2):
+    """Verifica se a primeira string vem antes da segunda na "ordem alfabética".
+
+    Args:
+        str1 (str): Primeira string, que para retornar True deve vir antes da outra.
+        str2 (str): Segunda string, que para retornar True deve vir após a outra.
+        lenght1 (int): Size of first string.
+        lenght2 (int): Size of second string.
+
+    Returns:
+        bool: True se 'str1 < str2'. False caso contrário
+    """
+    if lenght1 < lenght2: l = lenght1
+    else: l = lenght2
+    
+    for i in range(l):
+        if ord(str1[i]) < ord(str2[i]): return True
+        if ord(str1[i]) > ord(str2[i]): return False
+    
+    if lenght1 < lenght2: return True
+    return False
+
 class DataGrid():
     """Objeto que armazena um datagrid de negócios
     """
@@ -112,7 +134,7 @@ class DataGrid():
         """
 
         # Caso o índice inicial seja maior que o tamanho da lista, ou caso o índice inicial seja igual ao índice final, não há eventos para serem impressos
-        if (start > len(self.list) or start == end):
+        if (start > self.size or start == end):
             print("Não há eventos para serem impressos")
             return
 
@@ -233,7 +255,7 @@ class DataGrid():
                             max_inx = j
                 self.swap_row(i, max_inx)     
         self.ordered_by = column
-        
+
     # def __quick_sort(self, column, direction="asc")
             #int
 
@@ -255,8 +277,17 @@ class DataGrid():
     #   if column == "ID" or column == "Count":
     #        return self.__quick_sort(column, direction)
 
-    def __exact_binary_search(self, column, value):
-        # Busca binária para variáveis numéricas
+    def __id_binary_search(self, column, value):
+        """Busca binária para valores de 'id' de objetos Event.
+        Método auxiliar a __exact_search().
+
+        Args:
+            column (str): Nome da coluna que está sendo buscada.
+            value (int): Valor procurado.
+
+        Returns:
+            int | None: Índice do evento correspondente ao valor buscado no DataGrid, ou None se não existe.
+        """
         start = 0
         end = self.size - 1
         mid = int(end/2)
@@ -268,23 +299,72 @@ class DataGrid():
             else: end = mid
 
             mid = int(start + (end - start)/2)
+            
+        if getattr(self.list[mid], column) == value: return mid
+        return None # Não foi encontrado
+    
+    def __owner_binary_search(self, column, value):
+        """Busca binária para valores de 'owner_id' de objetos Event.
+        Método auxiliar a __exact_search().
+
+        Args:
+            column (str): Nome da coluna que está sendo buscada.
+            value (int): Valor procurado.
+
+        Returns:
+            int | None: Índice do evento correspondente ao valor buscado no DataGrid, ou None se não existe.
+        """
+        start = 0
+        end = self.size - 1
+        mid = int(end/2)
+
+        while start != end: 
+            if getattr(self.list[mid], column) == value: return mid # Foi encontrado
         
+            if string_lesser(getattr(self.list[mid], column), value, 5, 5): start = mid
+            else: end = mid
+
+            mid = int(start + (end - start)/2)
+        
+        if getattr(self.list[mid], column) == value: return mid
         return None # Não foi encontrado
 
     def __exact_search(self, column, value):
+        """Busca por valores numéricos no DataGrid.
+        Método auxiliar a search().
+
+        Args:
+            column (str): Nome da coluna que está sendo buscada.
+            value (int | str): Valor procurado.
+
+        Returns:
+            int | None: Índice do evento correspondente ao valor buscado no DataGrid, ou None se não existe.
+        """
         # Se estiver ordenado pela coluna que estamos buscando, implementa a binary search
         if self.ordered_by == column:
-            return self.__exact_binary_search(column, value)
+            if column == "id":
+                return self.__id_binary_search(column, value)
+            elif column == "owner_id":
+                return self.__owner_binary_search(column, value)
 
-        # Se não, faça uma busca linear
+        # Se não, faça busca linear
         for idx in range(self.size):
             if getattr(self.list[idx], column) == value:
                 return idx
         
-        # Pior caso: não foi encontrado
-        return None
+        return None # Pior caso: não foi encontrado
 
     def __interval_binary_search(self, column, value):
+        """Busca binária para valores pertencentes a um intervalo no DataGrid.
+        Método auxiliar de __interval_search().
+
+        Args:
+            column (str): Nome da coluna que está sendo buscada.
+            value (tuple): Tupla com valores de início e fim do intervalo desejado, ambos inclusive.
+
+        Returns:
+            list: Lista de índices dos elementos do DataGrid que pertencem ao intervalo desejado.
+        """
         # Casos em que é impossível o intervalo existir no datagrid
         if getattr(self.list[self.size-1], column) < value[0] or getattr(self.list[0], column) > value[1]: return []
 
@@ -342,6 +422,16 @@ class DataGrid():
         return range(first, last+1)
 
     def __interval_search(self, column, value):
+        """Busca de valores pertencentes a um intervalo no DataGrid.
+        Método auxiliar de search().
+
+        Args:
+            column (str): Nome da coluna que está sendo buscada.
+            value (tuple): Tupla com valores de início e fim do intervalo desejado, ambos inclusive.
+
+        Returns:
+            list: Lista de índices dos elementos do DataGrid que pertencem ao intervalo desejado.
+        """
         # Busca binária caso esteja ordenado
         if self.ordered_by == column:
             return self.__interval_binary_search(column, value)
@@ -359,7 +449,17 @@ class DataGrid():
                 result.append(idx)
         return result
     
-    def __contain(self, str1, str2, str_len):
+    def __contain(self, str1, str2, str2_len):
+        """Verifica se a string str1 contém str2.
+
+        Args:
+            str1 (str): String que deve conter a outra.
+            str2 (str): String que deve estar contida na outra.
+            str2_len (int): Tamanho da str2.
+
+        Returns:
+            bool: True se str1 conter str2, False caso contrário.
+        """
         matches = 0
         for i in range(len(str1)):
             if str1[i] == str2[matches]:
@@ -367,11 +467,20 @@ class DataGrid():
             else:
                 matches = 0
             
-            if matches == str_len: 
+            if matches == str2_len: 
                 return True
         return False
 
     def __contain_search(self, column, value):
+        """Busca por Events cujas entradas contenham o value passado.
+
+        Args:
+            column (str): Nome da coluna que está sendo buscada.
+            value (str): Valor que deverá estar contido na entrada da coluna passada.
+
+        Returns:
+            list: Lista de índices dos Events cujas entradas contêm o valor passado na coluna passada.
+        """
         lenght = len(value)     
         result = []
 
@@ -381,6 +490,15 @@ class DataGrid():
         return result
 
     def search(self, column, value):
+        """Busca pelo valor desejado na coluna desejada.
+
+        Args:
+            column (str): Nome da coluna onde será realizada a busca.
+            value (int | str | tuple): Valor que será buscado na coluna passada. O tipo do parâmetro deve ser coerente com o tipo de busca da coluna passada.
+
+        Returns:
+            _type_: _description_
+        """
         # Busca exata
         if column == "id" or column == "owner_id":
             idx = self.__exact_search(column, value)
@@ -573,10 +691,11 @@ if __name__ == "__main__":
     # Verificar o conteúdo do DataGrid
     datagrid.show()
 
-    print("Reinserindo evento 2 e buscando por owner_id do evento 1")
+    print("Reinserindo evento 2 e buscando pelo evento 1")
     
     # Buscar por elemento
     datagrid.insert_row(data_dict2)
+    datagrid.search("id", 1).show()
     datagrid.search("owner_id", "ab123").show()
 
     print("Buscando por conteúdo")
