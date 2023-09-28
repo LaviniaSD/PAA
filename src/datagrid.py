@@ -108,7 +108,7 @@ class DataGrid():
         self.size += 1
         self.ordered_by = None
     
-    def delete_row(self, column, value):
+    def delete_row(self, column, value,method=None):
         """Deleta uma linha do DataGrid
 
         Args:
@@ -118,10 +118,18 @@ class DataGrid():
         new_list = []
         self.size = 0
 
-        for event in self.list:
-            if getattr(event, column) != value:
-                new_list.append(event)
-                self.size += 1
+        if method == "position":
+            i = 0
+            for event in self.list:
+                if i != value:
+                    new_list.append(event)
+                    self.size += 1
+                i += 1
+        else:
+            for event in self.list:
+                if getattr(event, column) != value:
+                    new_list.append(event)
+                    self.size += 1
         
         self.list = new_list
         
@@ -683,10 +691,10 @@ if __name__ == "__main__":
 
     datagrid.show()
     
-    print("Após deletar o evento 2")
+    print("Após deletar o evento 2 pela sua posição")
 
     # Deletar um evento
-    datagrid.delete_row("id", 2)
+    datagrid.delete_row("id", 0, "position")
 
     # Verificar o conteúdo do DataGrid
     datagrid.show()
