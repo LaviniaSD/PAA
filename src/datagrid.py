@@ -414,6 +414,90 @@ class DataGrid():
                 return result
 
         return None # Pior caso: busca não encontrou nada
+    
+    def copy(self):
+        """Produz uma deep copy do datagrid       
+        """
+        new_datagrid = DataGrid()
+
+        # Copia a lista de eventos
+        new_datagrid.list = self.list.copy()
+
+        # Copia os atributos
+        new_datagrid.ordered_by = self.ordered_by
+        new_datagrid.size = self.size
+
+        return new_datagrid
+    
+    def __quick_select(self, datagrid, l, r, k):
+        """Encontra o k-ésimo menor elemento do DataGrid através do algoritmo de Quick Select
+        
+        Args:
+            datagrid (DataGrid): DataGrid a ser analisado
+            l (int): índice inicial do intervalo
+            r (int): índice final do intervalo
+            k (int): índice do elemento procurado
+        """
+        
+        # Caso base
+        if l == r:
+            return datagrid.list[l]
+        
+        # Particiona o vetor
+        pivot = datagrid.list[l]
+        i = l
+        j = r
+        while i < j:
+            while datagrid.list[i].count <= pivot.count and i < r:
+                i += 1
+            while datagrid.list[j].count > pivot.count and j > l:
+                j -= 1
+            if i < j:
+                datagrid.swap_row(i, j)
+        datagrid.swap_row(l, j)
+
+        # Verifica se o elemento procurado é o pivô
+        if k == j:
+            return datagrid.list[j]
+        
+        # Verifica se o elemento procurado está à esquerda do pivô
+        elif k < j:
+            return self.__quick_select(datagrid, l, j-1, k)
+        
+        # Verifica se o elemento procurado está à direita do pivô
+        else:
+            return self.__quick_select(datagrid, j+1, r, k)
+        
+    def select_count(self, i, j):
+        """Seleciona um intervalo de entradas do DataGrid com base na coluna count ordenada de forma crescente.
+
+        Args:
+            i (int): índice inicial do intervalo
+            j (int): índice final do intervalo
+        """
+
+        # Caso o datagrid esteja ordenado, basta retornar o intervalo entre a i-ésima e a j-ésima entrada
+        if self.ordered_by == "Count":
+
+            datagrid_selected = DataGrid()
+
+            datagrid_selected.list = self.list[i:j+1]
+            return datagrid_selected
+        
+        # Caso contrário, usamos quickselect para encontrar o i-ésimo e o j-ésimo menor elemento
+        else:
+            # Cria uma cópia do datagrid (para preservar o estado interno da estrutura de dados)
+            datagrid_copy = self.copy()
+
+            # Encontra o i-ésimo e o j-ésimo menor elemento
+            i_min = self.__quick_select(datagrid_copy, 0, len(datagrid_copy.list)-1, i)
+            j_min = self.__quick_select(datagrid_copy, 0, len(datagrid_copy.list)-1, j)
+
+            # Encontra o intervalo entre os dois elementos
+            datagrid_copy.list = datagrid_copy.list[datagrid_copy.list.index(i_min):datagrid_copy.list.index(j_min)+1]
+
+            # Retorna o datagrid apenas com o intervalo entre os dois elementos
+            return datagrid_copy
 
 class Event():
     """Objeto que armazena uma linha de um DataGrid
@@ -515,3 +599,12 @@ if __name__ == "__main__":
     datagrid_csv = DataGrid()
     datagrid_csv.read_csv("data/sample.csv")
     datagrid_csv.show()
+
+    print("select_count(2, 5) para um vetor não ordenado")
+    print("Ordenação:", datagrid_csv.ordered_by)
+    datagrid_csv.select_count(2, 5).show()
+
+    print("select_count(2, 5) para um vetor ordenado")
+    datagrid_csv.insertion_sort("Count")
+    print("Ordenação:", datagrid_csv.ordered_by)
+    datagrid_csv.select_count(2, 5).show()
