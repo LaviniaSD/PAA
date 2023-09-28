@@ -507,40 +507,33 @@ class DataGrid():
         Returns:
             _type_: _description_
         """
+        result = DataGrid() 
         # Busca exata
         if column == "id" or column == "owner_id":
             idx = self.__exact_search(column, value)
             
-            if idx == None: return None
-
-            result = DataGrid()
-            result.list.append(self.list[idx])
-            result.size += 1
-            return result
-
+            if idx != None: 
+                result.list.append(self.list[idx])
+                result.size += 1
+            
         # Busca por intervalo
         elif column == "creation_date" or column == "count":
             idx_list = self.__interval_search(column, value)
-            if len(idx_list) > 0:
-                result = DataGrid()
-                for i in idx_list:
-                    result.list.append(self.list[i])
-                    result.size += 1
-                return result
+            
+            for i in idx_list:
+                result.list.append(self.list[i])
+                result.size += 1
         
         # Busca por conteúdo
         elif column == "name" or column == "content":
             idx_list = self.__contain_search(column, value)
             
-            if len(idx_list) > 0:
-                result = DataGrid()
-                for i in idx_list:
-                    result.list.append(self.list[i])
-                    result.size += 1
-                return result
+            for i in idx_list:
+                result.list.append(self.list[i])
+                result.size += 1
 
-        return None # Pior caso: busca não encontrou nada
-    
+        return result
+        
     def copy(self):
         """Produz uma deep copy do datagrid       
         """
