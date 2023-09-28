@@ -31,7 +31,7 @@ def string_lesser(str1, str2, lenght1, lenght2):
         if ord(str1[i]) < ord(str2[i]): return True
         if ord(str1[i]) > ord(str2[i]): return False
     
-    if l == lenght1: return True
+    if lenght1 < lenght2: return True
     return False
 
 class DataGrid():
