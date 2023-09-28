@@ -12,6 +12,28 @@ def date_to_timestamp(date_str):
     dtime = datetime.strptime(date_str, "%Y/%m/%d %H:%M:%S")
     return dtime.timestamp()
 
+def string_lesser(str1, str2, lenght1, lenght2):
+    """Verifica se a primeira string vem antes da segunda na "ordem alfabética".
+
+    Args:
+        str1 (str): Primeira string, que para retornar True deve vir antes da outra.
+        str2 (str): Segunda string, que para retornar True deve vir após a outra.
+        lenght1 (int): Size of first string.
+        lenght2 (int): Size of second string.
+
+    Returns:
+        bool: True se 'str1 < str2'. False caso contrário
+    """
+    if lenght1 < lenght2: l = lenght1
+    else: l = lenght2
+    
+    for i in range(l):
+        if ord(str1[i]) < ord(str2[i]): return True
+        if ord(str1[i]) > ord(str2[i]): return False
+    
+    if l == lenght1: return True
+    return False
+
 class DataGrid():
     """Objeto que armazena um datagrid de negócios
     """
@@ -255,8 +277,8 @@ class DataGrid():
     #   if column == "ID" or column == "Count":
     #        return self.__quick_sort(column, direction)
 
-    def __exact_binary_search(self, column, value):
-        """Busca binária para colunas numéricas de objetos Event.
+    def __id_binary_search(self, column, value):
+        """Busca binária para valores de 'id' de objetos Event.
         Método auxiliar a __exact_search().
 
         Args:
@@ -277,7 +299,34 @@ class DataGrid():
             else: end = mid
 
             mid = int(start + (end - start)/2)
+            
+        if getattr(self.list[mid], column) == value: return mid
+        return None # Não foi encontrado
+    
+    def __owner_binary_search(self, column, value):
+        """Busca binária para valores de 'owner_id' de objetos Event.
+        Método auxiliar a __exact_search().
+
+        Args:
+            column (str): Nome da coluna que está sendo buscada.
+            value (int): Valor procurado.
+
+        Returns:
+            int | None: Índice do evento correspondente ao valor buscado no DataGrid, ou None se não existe.
+        """
+        start = 0
+        end = self.size - 1
+        mid = int(end/2)
+
+        while start != end: 
+            if getattr(self.list[mid], column) == value: return mid # Foi encontrado
         
+            if string_lesser(getattr(self.list[mid], column), value, 5, 5): start = mid
+            else: end = mid
+
+            mid = int(start + (end - start)/2)
+        
+        if getattr(self.list[mid], column) == value: return mid
         return None # Não foi encontrado
 
     def __exact_search(self, column, value):
@@ -293,8 +342,10 @@ class DataGrid():
         """
         # Se estiver ordenado pela coluna que estamos buscando, implementa a binary search
         if self.ordered_by == column:
-            return self.__exact_binary_search(column, value)
-        
+            if column == "id":
+                return self.__id_binary_search(column, value)
+            elif column == "owner_id":
+                return self.__owner_binary_search(column, value)
 
         # Se não, faça busca linear
         for idx in range(self.size):
@@ -580,6 +631,6 @@ if __name__ == "__main__":
     datagrid.search("creation_date", ("2023/09/26 14:00:01", "2023/09/26 17:00:00")).show()
 
     # Carregando dados a partir de um CSV
-    datagrid_csv = DataGrid()
-    datagrid_csv.read_csv("data/sample.csv")
-    datagrid_csv.show()
+    # datagrid_csv = DataGrid()
+    # datagrid_csv.read_csv("data/sample.csv")
+    # datagrid_csv.show()
