@@ -429,6 +429,8 @@ class DataGrid():
 
         return new_datagrid
     
+    # TODO: implementar o MOM de acordo com a função sort (a partir do momento q ela reconhecer o melhor algoritmo para cada ordenação)
+    
     def __quick_select(self, datagrid, l, r, k):
         """Encontra o k-ésimo menor elemento do DataGrid através do algoritmo de Quick Select
         
