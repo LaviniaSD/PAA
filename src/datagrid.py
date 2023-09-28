@@ -268,6 +268,14 @@ class DataGrid():
             #int
 
     def merge_sort(self, column, direction = "asc", start = 0, end = None):
+        """Algoritmo merge_sort de complexidade O(n logn) para ordenar as linhas do DataGrid.
+
+        Args:
+            column (str): Nome da coluna que será usada para ordenação.
+            direction (str, optional): Direção de ordenação, 'asc' para crescente, 'desc' para decrescente. Defaults to "asc".
+            start (int, optional): Parâmetro para recursão. Índice de início da sublista a ser ordenada. Defaults to 0.
+            end (_type_, optional): Parâmetro para recursão. Índice de fim da sublista a ser ordenada. Defaults to None.
+        """
         # Define método de comparação segundo tipo da coluna e direção
         if direction == "asc":
             if column == "id" or column == "count": compare = lambda x, y: x < y
