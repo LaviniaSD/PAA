@@ -267,8 +267,48 @@ class DataGrid():
     # def __quick_sort(self, column, direction="asc")
             #int
 
-    # def __merge_sort(self, column, direction="asc")
-            #
+    def merge_sort(self, column, direction = "asc", start = 0, end = None):
+        # Define método de comparação segundo tipo da coluna e direção
+        if direction == "asc":
+            if column == "id" or column == "count": compare = lambda x, y: x < y
+            else: compare = lambda x, y: string_lesser(x, y, len(x), len(y))
+        else:
+            if column == "id" or column == "count": compare = lambda x, y: x >= y
+            else: compare = lambda x, y: not string_lesser(x, y, len(x), len(y))
+        
+        # Define as divisões das sublistas
+        if end == None: end = self.size - 1
+        mid = int((end + start)/2)
+
+        # Chamada recursiva para ordenar as sublistas
+        if (mid - start) > 0: self.merge_sort(column, direction, start, mid)
+        if (end - mid) > 0: self.merge_sort(column, direction, mid+1, end)
+        
+        temp_list = [] # Lista temporária auxiliar
+        idx_left = start # Início da sublista esquerda
+        idx_right = mid+1 # Início da sublista direita
+
+        # Loop para merge das sublistas
+        while idx_left <= mid and idx_right <= end:
+            if compare(getattr(self.list[idx_left], column), getattr(self.list[idx_right], column)): 
+                temp_list.append(self.list[idx_left])
+                idx_left += 1
+            else: 
+                temp_list.append(self.list[idx_right])
+                idx_right += 1
+        
+        # Se sobrou algo na esquerda
+        while idx_left <= mid:
+            temp_list.append(self.list[idx_left])
+            idx_left += 1
+
+        # Se sobrou algo na direita
+        while idx_right <= end:
+            temp_list.append(self.list[idx_right])
+            idx_right += 1
+        
+        for i in range(start, end+1):
+            self.list[i] = temp_list[i-start]
 
     # def __radix_sort(self, column, direction="asc") 
             #owner
@@ -281,6 +321,7 @@ class DataGrid():
     # def __heap_sort(self, column, direction="asc")
             #
 
+    # TODO: sort precisa de um parâmetro que decide qual algoritmo usar
     #def sort(self, column, direction="asc"):
     #   if column == "ID" or column == "Count":
     #        return self.__quick_sort(column, direction)
@@ -730,3 +771,18 @@ if __name__ == "__main__":
     datagrid_csv.insertion_sort("Count")
     print("Ordenação:", datagrid_csv.ordered_by)
     datagrid_csv.select_count(2, 5).show()
+
+    print("Teste merge_sort por ID")
+    datagrid_csv.merge_sort("id")
+    print("Ordenação:", datagrid_csv.ordered_by)
+    datagrid_csv.show()
+
+    print("Teste merge_sort por Owner ID")
+    datagrid_csv.merge_sort("owner_id")
+    print("Ordenação:", datagrid_csv.ordered_by)
+    datagrid_csv.show()
+
+    print("Teste merge_sort desc por creation_date")
+    datagrid_csv.merge_sort("creation_date", "desc")
+    print("Ordenação:", datagrid_csv.ordered_by)
+    datagrid_csv.show()
