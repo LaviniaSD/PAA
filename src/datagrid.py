@@ -343,8 +343,8 @@ class DataGrid():
     #   if column == "ID" or column == "Count":
     #        return self.__quick_sort(column, direction)
 
-    def __id_binary_search(self, column, value):
-        """Busca binária para valores de 'id' de objetos Event.
+    def __exact_binary_search(self, column, value):
+        """Busca binária para valores de 'id' ou 'owner_id' de objetos Event.
         Método auxiliar a __exact_search().
 
         Args:
@@ -354,6 +354,13 @@ class DataGrid():
         Returns:
             int | None: Índice do evento correspondente ao valor buscado no DataGrid, ou None se não existe.
         """
+        if self.direction == "asc":
+            if column == "id": compare = lambda x, y: x < y
+            else: compare = lambda x, y: string_lesser(x, y, len(x), len(y))
+        elif self.direction == "desc":
+            if column == "id": compare = lambda x, y: x > y
+            else: compare = lambda x, y: not string_lesser(x, y, len(x), len(y))
+
         start = 0
         end = self.size - 1
         mid = int(end/2)
@@ -361,42 +368,16 @@ class DataGrid():
         while start != end: 
             if getattr(self.list[mid], column) == value: return mid # Foi encontrado
         
-            if getattr(self.list[mid], column) < value: start = mid
+            if compare(getattr(self.list[mid], column), value): start = mid
             else: end = mid
 
             mid = int(start + (end - start)/2)
             
         if getattr(self.list[mid], column) == value: return mid
         return None # Não foi encontrado
-    
-    def __owner_binary_search(self, column, value):
-        """Busca binária para valores de 'owner_id' de objetos Event.
-        Método auxiliar a __exact_search().
-
-        Args:
-            column (str): Nome da coluna que está sendo buscada.
-            value (int): Valor procurado.
-
-        Returns:
-            int | None: Índice do evento correspondente ao valor buscado no DataGrid, ou None se não existe.
-        """
-        start = 0
-        end = self.size - 1
-        mid = int(end/2)
-
-        while start != end: 
-            if getattr(self.list[mid], column) == value: return mid # Foi encontrado
-        
-            if string_lesser(getattr(self.list[mid], column), value, 5, 5): start = mid
-            else: end = mid
-
-            mid = int(start + (end - start)/2)
-        
-        if getattr(self.list[mid], column) == value: return mid
-        return None # Não foi encontrado
 
     def __exact_search(self, column, value):
-        """Busca por valores numéricos no DataGrid.
+        """Busca por valores exatos no DataGrid.
         Método auxiliar a search().
 
         Args:
@@ -408,10 +389,8 @@ class DataGrid():
         """
         # Se estiver ordenado pela coluna que estamos buscando, implementa a binary search
         if self.ordered_by == column:
-            if column == "id":
-                return self.__id_binary_search(column, value)
-            elif column == "owner_id":
-                return self.__owner_binary_search(column, value)
+            if column == "id" or column == "owner_id":
+                return self.__exact_binary_search(column, value)
 
         # Se não, faça busca linear
         for idx in range(self.size):
@@ -431,9 +410,6 @@ class DataGrid():
         Returns:
             list: Lista de índices dos elementos do DataGrid que pertencem ao intervalo desejado.
         """
-        # Casos em que é impossível o intervalo existir no datagrid
-        if getattr(self.list[self.size-1], column) < value[0] or getattr(self.list[0], column) > value[1]: return []
-
         # Se procurar por data, usa timestamp ao invés da string
         if column == "creation_date": 
             column = "timestamp"
@@ -442,50 +418,94 @@ class DataGrid():
         start = 0
         end = self.size - 1
         mid = int(end/2)
+        
+        if self.direction == "asc":
+            # Loop para encontrar o limite inferior
+            while start != end: 
+                cur_val = getattr(self.list[mid], column)
 
-        # Loop para encontrar o limite inferior
-        while start != end: 
-            cur_val = getattr(self.list[mid], column)
+                # Se encontramos exatamente o limite inferior do intervalo, garantimos que abrangimos todas as suas duplicatas e quebramos o loop
+                if cur_val == value[0]: 
+                    while getattr(self.list[mid-1], column) == value[0]: mid -= 1
+                    break
+                
+                if cur_val < value[0]: start = mid
+                else: end = mid
 
-            # Se encontramos exatamente o limite inferior do intervalo, garantimos que abrangimos todas as suas duplicatas e quebramos o loop
-            if cur_val == value[0]: 
-                while getattr(self.list[mid-1], column) == value[0]: mid -= 1
-                break
-            
-            if cur_val < value[0]: start = mid
-            else: end = mid
+                mid = int(start + (end - start)/2)
 
-            mid = int(start + (end - start)/2)
+            if getattr(self.list[mid], column) < value[0]: mid += 1
+            if getattr(self.list[mid], column) > value[1]: return [] # Caso em que o intervalo não existe
 
-        if getattr(self.list[mid], column) < value[0]: mid += 1
-        if getattr(self.list[mid], column) > value[1]: return [] # Caso em que o intervalo não existe
+            # Nesse momento, mid é o índice do primeiro elemento do grid que pertence ao intervalo
+            first = mid
 
-        # Nesse momento, mid é o índice do primeiro elemento do grid que pertence ao intervalo
-        first = mid
+            start = first # Não precisamos procurar o limite superior do intervalo antes do inferior
+            end = self.size - 1
+            mid = int((end+start)/2)
 
-        start = first # Não precisamos procurar o limite superior do intervalo antes do inferior
-        end = self.size - 1
-        mid = int(end/2)
+            # Loop para encontrar o limite superior
+            while start != end:
+                cur_val = getattr(self.list[mid], column)
 
-        # Loop para encontrar o limite superior
-        while start != end:
-            cur_val = getattr(self.list[mid], column)
+                # Se encontramos exatamente o limite superior do intervalo, garantimos que abrangimos todas as suas duplicatas e quebramos o loop
+                if cur_val == value[1]: 
+                    while getattr(self.list[mid+1], column) == value[1]: mid += 1
+                    break
+                
+                if cur_val < value[1]: start = mid
+                else: end = mid
 
-            # Se encontramos exatamente o limite superior do intervalo, garantimos que abrangimos todas as suas duplicatas e quebramos o loop
-            if cur_val == value[1]: 
-                while getattr(self.list[mid+1], column) == value[1]: mid += 1
-                break
-            
-            if cur_val < value[1]: start = mid
-            else: end = mid
+                mid = int(start + (end - start)/2)
 
-            mid = int(start + (end - start)/2)
+            if getattr(self.list[mid], column) > value[1]: mid -= 1
+            # Nesse momento, mid é o índice do último elemento do grid que pertence ao intervalo
+            last = mid
+            return range(first, last+1)
 
-        if getattr(self.list[mid], column) > value[1]: mid -= 1
-        # Nesse momento, mid é o índice do último elemento do grid que pertence ao intervalo
-        last = mid
+        elif self.direction == "desc":
+            # Loop para encontrar o limite inferior
+            while start != end: 
+                cur_val = getattr(self.list[mid], column)
 
-        return range(first, last+1)
+                # Se encontramos exatamente o limite inferior do intervalo, garantimos que abrangimos todas as suas duplicatas e quebramos o loop
+                if cur_val == value[0]: 
+                    while getattr(self.list[mid-1], column) == value[0]: mid += 1
+                    break
+                
+                if cur_val < value[0]: end = mid
+                else: start = mid
+
+                mid = int(start + (end - start)/2)
+
+            if getattr(self.list[mid], column) < value[0]: mid -= 1
+            if getattr(self.list[mid], column) > value[1]: return [] # Caso em que o intervalo não existe
+
+            # Nesse momento, mid é o índice do último elemento do grid que pertence ao intervalo
+            first = mid
+
+            start = 0 
+            end = first # Não precisamos procurar o limite superior do intervalo depois do inferior
+            mid = int((end+start)/2)
+
+            # Loop para encontrar o limite superior
+            while start != end:
+                cur_val = getattr(self.list[mid], column)
+
+                # Se encontramos exatamente o limite superior do intervalo, garantimos que abrangimos todas as suas duplicatas e quebramos o loop
+                if cur_val == value[1]: 
+                    while getattr(self.list[mid+1], column) == value[1]: mid -= 1
+                    break
+                
+                if cur_val < value[1]: end = mid
+                else: start = mid
+
+                mid = int(start + (end - start)/2)
+
+            if getattr(self.list[mid], column) > value[1]: mid += 1
+            # Nesse momento, mid é o índice do último elemento do grid que pertence ao intervalo
+            last = mid
+            return range(last, first+1)
 
     def __interval_search(self, column, value):
         """Busca de valores pertencentes a um intervalo no DataGrid.
@@ -747,7 +767,7 @@ if __name__ == "__main__":
     print("Após deletar o evento 2 pela sua posição")
 
     # Deletar um evento
-    datagrid.delete_row("id", 0, "position")
+    datagrid.delete_row("position", 0)
 
     # Verificar o conteúdo do DataGrid
     datagrid.show()
