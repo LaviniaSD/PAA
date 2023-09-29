@@ -42,6 +42,7 @@ class DataGrid():
         """
         self.list = []
         self.ordered_by = None
+        self.direction = None
         self.size = 0
 
     def read_csv(self, filepath, separator=",",encoding="utf-8"):
@@ -53,7 +54,6 @@ class DataGrid():
             encoding (str, optional): codificação do arquivo. Defaults to "utf-8".
         
         """
-
         # Abrindo o arquivo CSV
         try:
             file = open(filepath, mode="r", encoding=encoding)
@@ -103,12 +103,13 @@ class DataGrid():
         Args:
             row (dict): dicionário contendo dados de uma linha do DataGrid, com o nome das colunas como chaves, e as entradas do DataGrid como valores.
         """
-        event = Event(**row)
+        event = Event(row)
         self.list.append(event)
         self.size += 1
         self.ordered_by = None
+        self.direction = None
     
-    def delete_row(self, column, value,method=None):
+    def delete_row(self, column, value):
         """Deleta uma linha do DataGrid
 
         Args:
@@ -118,7 +119,7 @@ class DataGrid():
         new_list = []
         self.size = 0
 
-        if method == "position":
+        if column == "position":
             i = 0
             for event in self.list:
                 if i != value:
@@ -140,7 +141,6 @@ class DataGrid():
             start (int): índice inicial da impressão. 0, por padrão.
             end (int): índice final da impressão. 100, por padrão.
         """
-
         # Caso o índice inicial seja maior que o tamanho da lista, ou caso o índice inicial seja igual ao índice final, não há eventos para serem impressos
         if (start > self.size or start == end):
             print("Não há eventos para serem impressos")
@@ -174,7 +174,7 @@ class DataGrid():
         else:
             print("Índices fora dos limites da lista")
         
-        if self.ordered_by: self.ordered_by = None 
+        self.ordered_by = None 
 
     def insertion_sort(self, column, direction="asc"):
         """
@@ -204,6 +204,7 @@ class DataGrid():
                         # Atualizando j
                         j -= 1
                 self.list[j+1] = current_value
+
         # Ordenanado em ordem decrescente
         elif direction == "desc":
             # Iniciando loop externo
@@ -222,6 +223,8 @@ class DataGrid():
                         # Atualizando j
                         j -= 1
                 self.list[j+1] = current_value
+
+        self.direction = direction
         self.ordered_by = column
     
     def selection_sort(self, column, direction="asc"):
@@ -233,7 +236,7 @@ class DataGrid():
             direction (str, optional): A direção da ordenação, "asc" para ascendente (padrão) ou "desc" para descendente.
         """
         # Tamanho da entrada
-        n = len(self.list)
+        n = self.size
         # Ordenando em ordem crescente
         if direction == "asc":
             # Iniciando loop externo
@@ -248,6 +251,7 @@ class DataGrid():
                         if self.list[j].count < self.list[min_inx].count:
                             min_inx = j
                 self.swap_row(i, min_inx)
+
         # Ordenando em ordem decrescente
         if direction == "desc":
             # Iniciando loop externo
@@ -261,7 +265,9 @@ class DataGrid():
                     elif column == "Count":
                         if self.list[j].count > self.list[max_inx].count:
                             max_inx = j
-                self.swap_row(i, max_inx)     
+                self.swap_row(i, max_inx)  
+
+        self.direction = direction
         self.ordered_by = column
 
     # def __quick_sort(self, column, direction="asc")
@@ -317,6 +323,9 @@ class DataGrid():
         
         for i in range(start, end+1):
             self.list[i] = temp_list[i-start]
+
+        self.direction = direction
+        self.ordered_by = column
 
     # def __radix_sort(self, column, direction="asc") 
             #owner
