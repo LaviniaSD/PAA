@@ -381,7 +381,7 @@ class DataGrid():
     def heap_sort(self, n, column="ID", direction="asc"):
         if direction == "asc":
             self.build_heap(n, column, "max")
-        elif direction == "min":
+        elif direction == "desc":
             self.build_heap(n, column, "min")
         for i in range(n-1,0,-1):
             self.swap_row(0,i)
@@ -390,6 +390,7 @@ class DataGrid():
             elif direction == "desc":
                 self.heapfy_min(i, 0, column)
         self.ordered_by = column
+        self.direction = direction
 
     # TODO: sort precisa de um parâmetro que decide qual algoritmo usar
     #def sort(self, column, direction="asc"):
@@ -636,9 +637,10 @@ class DataGrid():
             value (int | str | tuple): Valor que será buscado na coluna passada. O tipo do parâmetro deve ser coerente com o tipo de busca da coluna passada.
 
         Returns:
-            _type_: _description_
+            DataGrid: Novo DataGrid contendo os Events que correspondem à busca. 
         """
         result = DataGrid() 
+
         # Busca exata
         if column == "id" or column == "owner_id":
             idx = self.__exact_search(column, value)
@@ -675,6 +677,7 @@ class DataGrid():
 
         # Copia os atributos
         new_datagrid.ordered_by = self.ordered_by
+        new_datagrid.direction = self.direction
         new_datagrid.size = self.size
 
         return new_datagrid
