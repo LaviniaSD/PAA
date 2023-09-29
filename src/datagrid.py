@@ -335,8 +335,61 @@ class DataGrid():
 
     # def __radix_sort_3(self, column, direction="asc")
             #date
-    # def __heap_sort(self, column, direction="asc")
-            #
+    def heapfy_max(self, n, i, column="ID"):
+        inx = i
+        left_inx = (i*2) + 1
+        right_inx = (i*2) + 2
+        if column == "ID":
+            if (left_inx < n) and (self.list[left_inx].id > self.list[inx].id):
+                inx = left_inx
+            if (right_inx < n) and (self.list[right_inx].id > self.list[inx].id):
+                inx = right_inx
+        elif column == "Count":
+            if (left_inx < n) and (self.list[left_inx].count > self.list[inx].count):
+                inx = left_inx
+            if (right_inx < n) and (self.list[right_inx].count > self.list[inx].count):
+                inx = right_inx
+        if inx != i:
+            self.swap_row(i, inx)
+            self.heapfy_max(n, inx, column)
+
+    def heapfy_min(self, n, i, column="ID"):
+        inx = i
+        left_inx = (i*2) + 1
+        right_inx = (i*2) + 2
+        if column == "ID":
+            if (left_inx < n) and (self.list[left_inx].id < self.list[inx].id):
+                inx = left_inx
+            if (right_inx < n) and (self.list[right_inx].id < self.list[inx].id):
+                inx = right_inx
+        elif column == "Count":
+            if (left_inx < n) and (self.list[left_inx].count < self.list[inx].count):
+                inx = left_inx
+            if (right_inx < n) and (self.list[right_inx].count < self.list[inx].count):
+                inx = right_inx
+        if inx != i:
+            self.swap_row(i, inx)
+            self.heapfy_min(n, inx, column)
+    
+    def build_heap(self, n, column="ID", type_heap="max"):
+        for i in range((n//2)-1,-1,-1):
+            if type_heap == "max":
+                self.heapfy_max(n, i, column)
+            elif type_heap == "min":
+                self.heapfy_min(n, i, column)
+
+    def heap_sort(self, n, column="ID", direction="asc"):
+        if direction == "asc":
+            self.build_heap(n, column, "max")
+        elif direction == "min":
+            self.build_heap(n, column, "min")
+        for i in range(n-1,0,-1):
+            self.swap_row(0,i)
+            if direction == "asc":
+                self.heapfy_max(i, 0, column)
+            elif direction == "desc":
+                self.heapfy_min(i, 0, column)
+        self.ordered_by = column
 
     # TODO: sort precisa de um parâmetro que decide qual algoritmo usar
     #def sort(self, column, direction="asc"):
