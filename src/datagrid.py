@@ -1,4 +1,7 @@
 from datetime import datetime
+
+from timer import timeit, get_execution_time
+
 def enumerated_alpha_numeric(char):
         alpha_numeric = {
     "0": 0, "1": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, "9": 9,
@@ -56,6 +59,7 @@ class DataGrid():
         self.direction = None
         self.size = 0
 
+    @timeit
     def read_csv(self, filepath, separator=",",encoding="utf-8"):
         """Carrega os dados de um arquivo CSV para o DataGrid
 
@@ -1063,6 +1067,7 @@ class DataGrid():
         else:
             return self.__quick_select(datagrid, j+1, r, k)
         
+    @timeit
     def select_count(self, i, j):
         """Seleciona um intervalo de entradas do DataGrid com base na coluna count ordenada de forma crescente.
 
@@ -1197,22 +1202,33 @@ if __name__ == "__main__":
 
     # Carregando dados a partir de um CSV
     datagrid_csv = DataGrid()
-    datagrid_csv.read_csv("data/sample.csv")
+    datagrid_csv.read_csv("data/dados_gerados.csv", ";")
     datagrid_csv.show()
 
     print("select_count(2, 5) para um vetor não ordenado")
     print(f"Ordenação: {datagrid_csv.ordered_by}")
-    datagrid_csv.select_count(2, 5).show()
+    # datagrid_csv.select_count(2, 5).show()
+    datagrid_csv.select_count(2, 5)
+    
+    get_execution_time("select_count", True)
 
     print("select_count(2, 5) para um vetor ordenado (asc)")
     datagrid_csv.insertion_sort("Count")
     print(f"Ordenação: {datagrid_csv.ordered_by} ({datagrid_csv.direction})")
-    datagrid_csv.select_count(2, 5).show()
+    # datagrid_csv.select_count(2, 5).show()
+    datagrid_csv.select_count(2, 5)
+    
+    get_execution_time("select_count", True)
 
     print("select_count(2, 5) para um vetor ordenado (desc)")
     datagrid_csv.insertion_sort("Count", "desc")
     print(f"Ordenação: {datagrid_csv.ordered_by} ({datagrid_csv.direction})")
-    datagrid_csv.select_count(2, 5).show()
+    # datagrid_csv.select_count(2, 5).show()
+    datagrid_csv.select_count(2, 5)
+    
+    get_execution_time("select_count", True)
+
+    # TODO: implementar o decorador @timeit para as demais funções após discutir os métodos que receberão o decorador
 
     print("Teste merge_sort por ID")
     datagrid_csv.merge_sort("id")
