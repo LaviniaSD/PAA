@@ -411,6 +411,7 @@ class DataGrid():
             pos (int): A posição do caractere a ser considerado durante a ordenação.
             lim (int): O número de caracteres a serem considerados durante a ordenação.
             column (str): O nome da coluna pela qual o DataGrid será ordenado.
+            type_code (str, optional): O tipo de enumeração que será usada para cara char, padrão ASCII.
             start (int, optional): O índice inicial para a ordenação (padrão é 0).
             end (int, optional): O índice final para a ordenação (padrão é -1, indicando o final da lista).
             direction (str, optional): A direção da ordenação, "asc" para ascendente (padrão) ou "desc" para descendente.
