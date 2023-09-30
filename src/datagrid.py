@@ -190,101 +190,63 @@ class DataGrid():
             print("Índices fora dos limites da lista")
         
         self.ordered_by = None 
-
-    def insertion_sort(self, column, direction="asc"):
+    
+    def insertion_sort(self, column="id", direction="asc"):
         """
         Ordena um datagrid usando o algoritmo de ordenação por inserção.
 
         Args:
-            column (str): O nome da coluna pela qual o datagrid será ordenado.
+            column (str, optional): O nome da coluna pela qual o datagrid será ordenado, "id" para ordenar na coluna ID.
             direction (str, optional): A direção da ordenação, "asc" para ascendente (padrão) ou "desc" para descendente.
         """
         # Tamanho da entrada
-        n = self.size
+        n = self.size        
         # Ordenanado em ordem crescente
-        if direction == "asc":
-            # Iniciando loop externo
-            for i in range(1,n):
-                current_value = self.list[i]
-                j = i-1
-                # Iniciando loop interno
-                if column == "ID":    
-                    while (self.list[j].id > current_value.id) and (j >= 0) :
-                        self.list[j+1] = self.list[j]
-                        # Atualizando j
-                        j -= 1
-                elif column == "Count":
-                    while (self.list[j].count > current_value.count) and (j >= 0) :
-                        self.list[j+1] = self.list[j]
-                        # Atualizando j
-                        j -= 1
-                self.list[j+1] = current_value
-
-        # Ordenanado em ordem decrescente
-        elif direction == "desc":
-            # Iniciando loop externo
-            for i in range(1,n):
-                current_value = self.list[i]
-                j = i-1
-                # Iniciando loop interno
-                if column == "ID":    
-                    while (self.list[j].id < current_value.id) and (j >= 0) :
-                        self.list[j+1] = self.list[j]
-                        # Atualizando j
-                        j -= 1
-                elif column == "Count":
-                    while (self.list[j].count < current_value.count) and (j >= 0) :
-                        self.list[j+1] = self.list[j]
-                        # Atualizando j
-                        j -= 1
-                self.list[j+1] = current_value
+        # Iniciando loop externo
+        for i in range(1,n):
+            current_value = self.list[i]
+            j = i-1
+            # Iniciando loop interno
+            if direction == "asc":
+              while (getattr(self.list[j], column) > getattr(current_value, column)) and (j >= 0) :
+                self.list[j+1] = self.list[j]
+                # Atualizando j
+                j -= 1
+            elif direction == "desc":
+              while (getattr(self.list[j], column) < getattr(current_value, column)) and (j >= 0) :
+                self.list[j+1] = self.list[j]
+                # Atualizando j
+                j -= 1
+            self.list[j+1] = current_value
 
         self.direction = direction
         self.ordered_by = column
-    
-    def selection_sort(self, column, direction="asc"):
+    def selection_sort(self, column="id", direction="asc"):
         """
         Ordena o DataGrid usando o algoritmo de ordenação por seleção.
 
         Args:
-            column (str): O nome da coluna pela qual o DataGrid será ordenado.
+            column (str, optional): O nome da coluna pela qual o DataGrid será ordenado, "id" para ordenar na coluna ID.
             direction (str, optional): A direção da ordenação, "asc" para ascendente (padrão) ou "desc" para descendente.
         """
         # Tamanho da entrada
         n = self.size
-        # Ordenando em ordem crescente
-        if direction == "asc":
-            # Iniciando loop externo
-            for i in range(n-1):
-                min_inx = i
-                # Iniciando loop interno
-                for j in range(i+1,n):
-                    if column == "ID":
-                        if self.list[j].id < self.list[min_inx].id:
-                            min_inx = j
-                    elif column == "Count":
-                        if self.list[j].count < self.list[min_inx].count:
-                            min_inx = j
-                self.swap_row(i, min_inx)
-
-        # Ordenando em ordem decrescente
-        if direction == "desc":
-            # Iniciando loop externo
-            for i in range(n-1):
-                max_inx = i
-                # Iniciando loop interno
-                for j in range(i+1,n):
-                    if column == "ID":
-                        if self.list[j].id > self.list[max_inx].id:
-                            max_inx = j
-                    elif column == "Count":
-                        if self.list[j].count > self.list[max_inx].count:
-                            max_inx = j
-                self.swap_row(i, max_inx)  
+        # Iniciando loope externo
+        for i in range(n-1):
+            inx = i
+            # Iniciando loop interno
+            for j in range(i+1,n):
+                if direction == "asc":
+                    if getattr(self.list[j], column) < getattr(self.list[inx], column):
+                        inx = j
+                if direction == "desc":
+                    if getattr(self.list[j], column) > getattr(self.list[inx], column):
+                        inx = j
+            self.swap_row(i, inx) 
 
         self.direction = direction
         self.ordered_by = column
-
+    
     # def __quick_sort(self, column, direction="asc")
             #int
 
@@ -362,18 +324,15 @@ class DataGrid():
         inx = i
         left_inx = (i*2) + 1
         right_inx = (i*2) + 2
-        if column == "id":
-            if (left_inx < n) and (self.list[left_inx].id > self.list[inx].id):
-                inx = left_inx
-            if (right_inx < n) and (self.list[right_inx].id > self.list[inx].id):
-                inx = right_inx
-        elif column == "count":
-            if (left_inx < n) and (self.list[left_inx].count > self.list[inx].count):
-                inx = left_inx
-            if (right_inx < n) and (self.list[right_inx].count > self.list[inx].count):
-                inx = right_inx
+        # Descendo a árvore e comparando
+        if (left_inx < n) and (getattr(self.list[left_inx], column) > getattr(self.list[inx], column)):
+            inx = left_inx
+        if (right_inx < n) and (getattr(self.list[right_inx], column) > getattr(self.list[inx], column)):
+            inx = right_inx
         if inx != i:
+            # Caso haja a necessidade de troca, troque o elemento com o nó filho
             self.swap_row(i, inx)
+            # Faça a descidada novamente no nó filho
             self.heapfy_max(n, inx, column)
 
     def heapfy_min(self, n, i, column):
@@ -388,23 +347,17 @@ class DataGrid():
         inx = i
         left_inx = (i*2) + 1
         right_inx = (i*2) + 2
-        if column == "id":
-            # Descendo a árvore e comparando
-            if (left_inx < n) and (self.list[left_inx].id < self.list[inx].id):
-                inx = left_inx
-            if (right_inx < n) and (self.list[right_inx].id < self.list[inx].id):
-                inx = right_inx
-        elif column == "count":
-            if (left_inx < n) and (self.list[left_inx].count < self.list[inx].count):
-                inx = left_inx
-            if (right_inx < n) and (self.list[right_inx].count < self.list[inx].count):
-                inx = right_inx
+        # Descendo a árvore e comparando
+        if (left_inx < n) and (getattr(self.list[left_inx], column) < getattr(self.list[inx], column)):
+            inx = left_inx
+        if (right_inx < n) and (getattr(self.list[right_inx], column) < getattr(self.list[inx], column)):
+            inx = right_inx
         if inx != i:
             # Caso haja a necessidade de troca, troque o elemento com o nó filho
             self.swap_row(i, inx)
             # Faça a descidada novamente no nó filho
             self.heapfy_min(n, inx, column)
-    
+
     def build_heap(self, n, column, type_heap="max"):
         """
         Constrói um heap a partir de um DataGrid.
@@ -424,13 +377,13 @@ class DataGrid():
             elif type_heap == "min":
                 self.heapfy_min(n, i, column)
 
-    def heap_sort(self, n, column, direction="asc"):
+    def heap_sort(self, n, column = "id", direction="asc"):
         """
         Ordena um DataGrid usando o algoritmo Heap Sort.
 
         Args:
             n (int): O tamanho da entrada.
-            column (str): O nome da coluna usada como critério para a ordenação.
+            column (str, optional): O nome da coluna usada como critério para a ordenação, "id" para ordenar na coluna ID..
             direction (str, optional): A direção da ordenação, "asc" para ascendente (padrão) ou "desc" para descendente.
         """
         if direction == "asc":
@@ -449,7 +402,7 @@ class DataGrid():
         self.ordered_by = column
         self.direction = direction
 
-    def radix_sort(self, pos, lim, column, start=0, end=-1, direction="asc"):
+    def radix_sort(self, pos, lim, column, type_code="ASCII", start=0, end=-1, direction="asc"):
         """
         Ordena o DataGrid usando o algoritmo de ordenação Radix Sort.
 
@@ -462,280 +415,73 @@ class DataGrid():
             direction (str, optional): A direção da ordenação, "asc" para ascendente (padrão) ou "desc" para descendente.
 
         """
-        if direction == "asc":
-            # Verificando se não passamos pelo número limite de repetições
-            if lim > 0:
-                if column == "content":
-                    # Se não for dado o fim do datagrid, fazer o fim a última linha
-                    if end == -1:
-                        end = self.size
-                    # Número de caracteres no padrão ASCII, fs inicialmente guarda a frequência de elementos
-                    # o elemento de valor n, é informado sua frequência na n+1-ésima entrada da lista fs
-                    fs = [0] * (129)
-                    # Lista temporaria para inserir os valores ordenados
-                    temp = [0] * (self.size)
-                    for i in range(start, end):
-                        # Caso uma palavra conter menos letras que outras
-                        try:
-                            self.list[i].content[pos]
-                        except IndexError:
-                            self.list[i].content += " "
-                        # Guardando caractere com seu valor ASCII
-                        fs[ord(self.list[i].content[pos]) + 1] += 1
-                    # Guardando a entrada que o número repetiu e quantas vezes ele repetiu
-                    aux = []
-                    for j in range(1,129):
-                      # Se o caractere se repete
-                      if fs[j]>1:
-                        aux.append([j-1, fs[j]])
-                    # Calculando onde cada elemento da lista começa e o espaço para guardar cada caractere 
-                    for j in range(1,129):
-                        fs[j]+=fs[j-1]
-                    # Inicio da realocação de elementos
-                    for i in range(start,end):
-                        if i == start:
-                        # Inicio da recursão, onde o elemento que contém mais de uma repetição começa
-                            aux_start=[]
-                            for k in aux:
-                                aux_start.append(fs[k[0]] + start)
-                        # Realocando elemento j
-                        j = ord(self.list[i].content[pos])
-                        temp[fs[j] + start] = self.list[i]
-                        print(temp)
-                        fs[j] += 1
-                    for i in range(start,end):
-                        # Realocando na lista original
-                        self.list[i] = temp[i]
-                    # Se tiver caracteres repetidos na posição
-                    if len(aux) != 0:
-                        for k in range(len(aux)):
-                            self.radix_sort(pos+1, lim-1, aux_start[k], aux_start[k] + aux[k][1])
-                elif column == "owner_id":
-                    # Se não for dado o fim do datagrid, fazer o fim a última linha
-                    if end == -1:
-                        end = self.size
-                    # Número de caracteres no padrão ASCII, fs inicialmente guarda a frequência de elementos
-                    # o elemento de valor n, é informado sua frequência na n+1-ésima entrada da lista fs
-                    fs = [0] * (63)
-                    # Lista temporaria para inserir os valores ordenados
-                    temp = [0] * (self.size)
-                    for i in range(start, end):
-                        # Caso uma palavra conter menos letras que outras
-                        try:
-                            self.list[i].owner_id[pos]
-                        except IndexError:
-                            self.list[i].owner_id += " "
-                        # Guardando caractere com seu valor ASCII
-                        fs[enumerated_alpha_numeric(self.list[i].owner_id[pos]) + 1] += 1
-                    # Guardando a entrada que o número repetiu e quantas vezes ele repetiu
-                    aux = []
-                    for j in range(1,63):
-                      # Se o caractere se repete
-                      if fs[j]>1:
-                        aux.append([j-1, fs[j]])
-                    # Calculando onde cada elemento da lista começa e o espaço para guardar cada caractere 
-                    for j in range(1,63):
-                        fs[j]+=fs[j-1]
-                    # Inicio da realocação de elementos
-                    for i in range(start,end):
-                        if i == start:
-                        # Inicio da recursão, onde o elemento que contém mais de uma repetição começa
-                            aux_start=[]
-                            for k in aux:
-                                aux_start.append(fs[k[0]] + start)
-                        # Realocando elemento j
-                        j = enumerated_alpha_numeric(self.list[i].owner_id[pos])
-                        temp[fs[j] + start] = self.list[i]
-                        fs[j] += 1
-                    for i in range(start,end):
-                        # Realocando na lista original
-                        self.list[i] = temp[i]
-                    # Se tiver caracteres repetidos na posição
-                    if len(aux) != 0:
-                        for k in range(len(aux)):
-                            self.radix_sort(pos+1, lim-1, aux_start[k], aux_start[k] + aux[k][1])
-                elif column == "name":
-                    # Se não for dado o fim do datagrid, fazer o fim a última linha
-                    if end == -1:
-                        end = self.size
-                    # Número de caracteres no padrão ASCII, fs inicialmente guarda a frequência de elementos
-                    # o elemento de valor n, é informado sua frequência na n+1-ésima entrada da lista fs
-                    fs = [0] * (129)
-                    # Lista temporaria para inserir os valores ordenados
-                    temp = [0] * (self.size)
-                    for i in range(start, end):
-                        # Caso uma palavra conter menos letras que outras
-                        try:
-                            self.list[i].name[pos]
-                        except IndexError:
-                            self.list[i].name += " "
-                        # Guardando caractere com seu valor ASCII
-                        fs[ord(self.list[i].name[pos]) + 1] += 1
-                    # Guardando a entrada que o número repetiu e quantas vezes ele repetiu
-                    aux = []
-                    for j in range(1,129):
-                      # Se o caractere se repete
-                      if fs[j]>1:
-                        aux.append([j-1, fs[j]])
-                    # Calculando onde cada elemento da lista começa e o espaço para guardar cada caractere 
-                    for j in range(1,129):
-                        fs[j]+=fs[j-1]
-                    # Inicio da realocação de elementos
-                    for i in range(start,end):
-                        if i == start:
-                        # Inicio da recursão, onde o elemento que contém mais de uma repetição começa
-                            aux_start=[]
-                            for k in aux:
-                                aux_start.append(fs[k[0]] + start)
-                        # Realocando elemento j
-                        j = ord(self.list[i].name[pos])
-                        temp[fs[j] + start] = self.list[i]
-                        fs[j] += 1
-                    for i in range(start,end):
-                        # Realocando na lista original
-                        self.list[i] = temp[i]
-                    # Se tiver caracteres repetidos na posição
-                    if len(aux) != 0:
-                        for k in range(len(aux)):
-                            self.radix_sort(pos+1, lim-1, aux_start[k], aux_start[k] + aux[k][1])
-        elif direction == "desc":
-            # Verificando se não passamos pelo número limite de repetições
-            if lim > 0:
-                if column == "content":
-                    # Se não for dado o fim do datagrid, fazer o fim a última linha
-                    if end == -1:
-                        end = self.size
-                    # Número de caracteres no padrão ASCII, fs inicialmente guarda a frequência de elementos
-                    # o elemento de valor n, é informado sua frequência na n+1-ésima entrada da lista fs
-                    fs = [0] * (129)
-                    # Lista temporaria para inserir os valores ordenados
-                    temp = [0] * (self.size)
-                    for i in range(start, end):
-                        # Caso uma palavra conter menos letras que outras
-                        try:
-                            self.list[i].content[pos]
-                        except IndexError:
-                            self.list[i].content += " "
-                        # Guardando caractere com seu valor ASCII
-                        fs[(128-ord(self.list[i].content[pos])) + 1] += 1
-                    # Guardando a entrada que o número repetiu e quantas vezes ele repetiu
-                    aux = []
-                    for j in range(1,129):
-                      # Se o caractere se repete
-                      if fs[j]>1:
-                        aux.append([j-1, fs[j]])
-                    # Calculando onde cada elemento da lista começa e o espaço para guardar cada caractere 
-                    for j in range(1,129):
-                        fs[j]+=fs[j-1]
-                    # Inicio da realocação de elementos
-                    for i in range(start,end):
-                        if i == start:
-                        # Inicio da recursão, onde o elemento que contém mais de uma repetição começa
-                            aux_start=[]
-                            for k in aux:
-                                aux_start.append(fs[k[0]] + start)
-                        # Realocando elemento j
-                        j = (128 - ord(self.list[i].content[pos]))
-                        temp[fs[j] + start] = self.list[i]
-                        print(temp)
-                        fs[j] += 1
-                    for i in range(start,end):
-                        # Realocando na lista original
-                        self.list[i] = temp[i]
-                    # Se tiver caracteres repetidos na posição
-                    if len(aux) != 0:
-                        for k in range(len(aux)):
-                            self.radix_sort(pos+1, lim-1, aux_start[k], aux_start[k] + aux[k][1])
-                elif column == "owner_id":
-                    # Se não for dado o fim do datagrid, fazer o fim a última linha
-                    if end == -1:
-                        end = self.size
-                    # Número de caracteres no padrão ASCII, fs inicialmente guarda a frequência de elementos
-                    # o elemento de valor n, é informado sua frequência na n+1-ésima entrada da lista fs
-                    fs = [0] * (63)
-                    # Lista temporaria para inserir os valores ordenados
-                    temp = [0] * (self.size)
-                    for i in range(start, end):
-                        # Caso uma palavra conter menos letras que outras
-                        try:
-                            self.list[i].owner_id[pos]
-                        except IndexError:
-                            self.list[i].owner_id += " "
-                        # Guardando caractere com seu valor ASCII
-                        fs[(62 - enumerated_alpha_numeric(self.list[i].owner_id[pos])) + 1] += 1
-                    # Guardando a entrada que o número repetiu e quantas vezes ele repetiu
-                    aux = []
-                    for j in range(1,63):
-                      # Se o caractere se repete
-                      if fs[j]>1:
-                        aux.append([j-1, fs[j]])
-                    # Calculando onde cada elemento da lista começa e o espaço para guardar cada caractere 
-                    for j in range(1,63):
-                        fs[j]+=fs[j-1]
-                    # Inicio da realocação de elementos
-                    for i in range(start,end):
-                        if i == start:
-                        # Inicio da recursão, onde o elemento que contém mais de uma repetição começa
-                            aux_start=[]
-                            for k in aux:
-                                aux_start.append(fs[k[0]] + start)
-                        # Realocando elemento j
-                        j = (62 - enumerated_alpha_numeric(self.list[i].owner_id[pos]))
-                        temp[fs[j] + start] = self.list[i]
-                        fs[j] += 1
-                    for i in range(start,end):
-                        # Realocando na lista original
-                        self.list[i] = temp[i]
-                    # Se tiver caracteres repetidos na posição
-                    if len(aux) != 0:
-                        for k in range(len(aux)):
-                            self.radix_sort(pos+1, lim-1, aux_start[k], aux_start[k] + aux[k][1])
-                elif column == "name":
-                    # Se não for dado o fim do datagrid, fazer o fim a última linha
-                    if end == -1:
-                        end = self.size
-                    # Número de caracteres no padrão ASCII, fs inicialmente guarda a frequência de elementos
-                    # o elemento de valor n, é informado sua frequência na n+1-ésima entrada da lista fs
-                    fs = [0] * (129)
-                    # Lista temporaria para inserir os valores ordenados
-                    temp = [0] * (self.size)
-                    for i in range(start, end):
-                        # Caso uma palavra conter menos letras que outras
-                        try:
-                            self.list[i].name[pos]
-                        except IndexError:
-                            self.list[i].name += " "
-                        # Guardando caractere com seu valor ASCII
-                        fs[(128 - ord(self.list[i].name[pos])) + 1] += 1
-                    # Guardando a entrada que o número repetiu e quantas vezes ele repetiu
-                    aux = []
-                    for j in range(1,129):
-                      # Se o caractere se repete
-                      if fs[j]>1:
-                        aux.append([j-1, fs[j]])
-                    # Calculando onde cada elemento da lista começa e o espaço para guardar cada caractere 
-                    for j in range(1,129):
-                        fs[j]+=fs[j-1]
-                    # Inicio da realocação de elementos
-                    for i in range(start,end):
-                        if i == start:
-                        # Inicio da recursão, onde o elemento que contém mais de uma repetição começa
-                            aux_start=[]
-                            for k in aux:
-                                aux_start.append(fs[k[0]] + start)
-                        # Realocando elemento j
-                        j = (128 - ord(self.list[i].name[pos]))
-                        temp[fs[j] + start] = self.list[i]
-                        fs[j] += 1
-                    for i in range(start,end):
-                        # Realocando na lista original
-                        self.list[i] = temp[i]
-                    # Se tiver caracteres repetidos na posição
-                    if len(aux) != 0:
-                        for k in range(len(aux)):
-                            self.radix_sort(pos+1, lim-1, aux_start[k], aux_start[k] + aux[k][1])
+        # Verificando se não passamos pelo número limite de repetições
+        if lim > 0:
+            if type_code == "ASCII":
+                type_code_size = 128 
+            elif type_code == "alphanumeric":
+                type_code_size = 62
+            # Se não for dado o fim do datagrid, fazer o fim a última linha
+            if end == -1:
+                end = self.size
+            # Número de caracteres no padrão type_code, fs inicialmente guarda a frequência de elementos
+            # o elemento de valor n, é informado sua frequência na n+1-ésima entrada da lista fs
+            fs = [0] * (type_code_size + 1)
+            # Lista temporaria para inserir os valores ordenados
+            temp = [0] * (self.size)
+            for i in range(start, end):
+                # Caso uma palavra conter menos letras que outras
+                try:
+                    getattr(self.list[i], column)[pos]
+                except IndexError:
+                    current_value = getattr(self.list[i], column) 
+                    current_value += " "
+                # Guardando caractere com seu valor ASCII
+                if direction == "asc" and type_code == "ASCII": 
+                    fs[ord(getattr(self.list[i], column)[pos]) + 1] += 1
+                elif direction == "asc" and type_code == "alphanumeric": 
+                    fs[enumerated_alpha_numeric(getattr(self.list[i], column)[pos]) + 1] += 1
+                elif direction == "desc" and type_code == "ASCII": 
+                    fs[type_code_size - 1 - ord(getattr(self.list[i], column)[pos]) + 1] += 1
+                elif direction == "desc" and type_code == "alphanumeric": 
+                    fs[type_code_size - 1 - enumerated_alpha_numeric(getattr(self.list[i], column)[pos]) + 1] += 1
+            # Guardando a entrada que o número repetiu e quantas vezes ele repetiu
+            aux = []
+            for j in range(1,type_code_size + 1):
+              # Se o caractere se repete
+                if fs[j]>1:
+                    aux.append([j-1, fs[j]])
+            # Calculando onde cada elemento da lista começa e o espaço para guardar cada caractere 
+            for j in range(1,type_code_size + 1):
+                fs[j]+=fs[j-1]
+            # Inicio da realocação de elementos
+            for i in range(start,end):
+                if i == start:
+                # Inicio da recursão, onde o elemento que contém mais de uma repetição começa
+                    aux_start=[]
+                    for k in aux:
+                        aux_start.append(fs[k[0]] + start)
+                # Realocando elemento j
+                if direction == "asc" and type_code == "ASCII": 
+                    j = ord(getattr(self.list[i], column)[pos])
+                elif direction == "asc" and type_code == "alphanumeric": 
+                    j = enumerated_alpha_numeric(getattr(self.list[i], column)[pos])
+                elif direction == "desc" and type_code == "ASCII": 
+                    j = type_code_size  -1 - ord(getattr(self.list[i], column)[pos])
+                elif direction == "desc" and type_code == "alphanumeric": 
+                    j = type_code_size -1 - enumerated_alpha_numeric(getattr(self.list[i], column)[pos])
+                temp[fs[j] + start] = self.list[i]
+                fs[j] += 1
+            for i in range(start,end):
+                # Realocando na lista original
+                self.list[i] = temp[i]
+            # Se tiver caracteres repetidos na posição
+            if len(aux) != 0:
+                for k in range(len(aux)):
+                    self.radix_sort(pos+1, lim-1, column, type_code, aux_start[k], aux_start[k] + aux[k][1], direction)
         self.ordered_by = column
         self.direction = direction
+
     # TODO: sort precisa de um parâmetro que decide qual algoritmo usar
     #def sort(self, column, direction="asc"):
     #   if column == "ID" or column == "Count":
