@@ -385,6 +385,7 @@ class DataGrid():
         left_inx = (i*2) + 1
         right_inx = (i*2) + 2
         if column == "id":
+            # Descendo a árvore e comparando
             if (left_inx < n) and (self.list[left_inx].id < self.list[inx].id):
                 inx = left_inx
             if (right_inx < n) and (self.list[right_inx].id < self.list[inx].id):
@@ -395,7 +396,9 @@ class DataGrid():
             if (right_inx < n) and (self.list[right_inx].count < self.list[inx].count):
                 inx = right_inx
         if inx != i:
+            # Caso haja a necessidade de troca, troque o elemento com o nó filho
             self.swap_row(i, inx)
+            # Faça a descidada novamente no nó filho
             self.heapfy_min(n, inx, column)
     
     def build_heap(self, n, column, type_heap="max"):
@@ -410,6 +413,7 @@ class DataGrid():
         Returns:
             None
         """
+        # Faça a alocação correta até a penúltima altura da árvore
         for i in range((n//2)-1,-1,-1):
             if type_heap == "max":
                 self.heapfy_max(n, i, column)
@@ -426,11 +430,14 @@ class DataGrid():
             direction (str, optional): A direção da ordenação, "asc" para ascendente (padrão) ou "desc" para descendente.
         """
         if direction == "asc":
+            # Construindo heap
             self.build_heap(n, column, "max")
         elif direction == "desc":
             self.build_heap(n, column, "min")
         for i in range(n-1,0,-1):
+            # Ordene pela raiz da árvore
             self.swap_row(0,i)
+            # Refaça o heap sem a raiz, ela foi jogada para o fim da lista e está ordenada
             if direction == "asc":
                 self.heapfy_max(i, 0, column)
             elif direction == "desc":
@@ -723,7 +730,8 @@ class DataGrid():
                     if len(aux) != 0:
                         for k in range(len(aux)):
                             self.radix_sort(pos+1, lim-1, aux_start[k], aux_start[k] + aux[k][1])
-
+        self.ordered_by = column
+        self.direction = direction
     # TODO: sort precisa de um parâmetro que decide qual algoritmo usar
     #def sort(self, column, direction="asc"):
     #   if column == "ID" or column == "Count":
