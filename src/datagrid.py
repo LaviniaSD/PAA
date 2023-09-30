@@ -1076,7 +1076,11 @@ class DataGrid():
 
             datagrid_selected = DataGrid()
 
-            datagrid_selected.list = self.list[i:j+1]
+            if self.direction == "asc":
+                datagrid_selected.list = self.list[i:j+1]
+            else:
+                datagrid_selected.list = self.list[self.size-(i)-1 : self.size-(j+1)-1 : -1]
+
             return datagrid_selected
         
         # Caso contrário, usamos quickselect para encontrar o i-ésimo e o j-ésimo menor elemento
@@ -1197,12 +1201,17 @@ if __name__ == "__main__":
     datagrid_csv.show()
 
     print("select_count(2, 5) para um vetor não ordenado")
-    print("Ordenação:", datagrid_csv.ordered_by)
+    print(f"Ordenação: {datagrid_csv.ordered_by}")
     datagrid_csv.select_count(2, 5).show()
 
-    print("select_count(2, 5) para um vetor ordenado")
+    print("select_count(2, 5) para um vetor ordenado (asc)")
     datagrid_csv.insertion_sort("Count")
-    print("Ordenação:", datagrid_csv.ordered_by)
+    print(f"Ordenação: {datagrid_csv.ordered_by} ({datagrid_csv.direction})")
+    datagrid_csv.select_count(2, 5).show()
+
+    print("select_count(2, 5) para um vetor ordenado (desc)")
+    datagrid_csv.insertion_sort("Count", "desc")
+    print(f"Ordenação: {datagrid_csv.ordered_by} ({datagrid_csv.direction})")
     datagrid_csv.select_count(2, 5).show()
 
     print("Teste merge_sort por ID")
