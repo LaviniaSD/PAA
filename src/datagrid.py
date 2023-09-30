@@ -1,4 +1,15 @@
 from datetime import datetime
+def enumerated_alpha_numeric(char):
+        alpha_numeric = {
+    "0": 0, "1": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, "9": 9,
+    "A": 10, "B": 11, "C": 12, "D": 13, "E": 14, "F": 15, "G": 16, "H": 17, "I": 18, "J": 19,
+    "K": 20, "L": 21, "M": 22, "N": 23, "O": 24, "P": 25, "Q": 26, "R": 27, "S": 28, "T": 29,
+    "U": 30, "V": 31, "W": 32, "X": 33, "Y": 34, "Z": 35,
+    "a": 36, "b": 37, "c": 38, "d": 39, "e": 40, "f": 41, "g": 42, "h": 43, "i": 44, "j": 45,
+    "k": 46, "l": 47, "m": 48, "n": 49, "o": 50, "p": 51, "q": 52, "r": 53, "s": 54, "t": 55,
+    "u": 56, "v": 57, "w": 58, "x": 59, "y": 60, "z": 61
+}   
+        return alpha_numeric[char]
 
 def date_to_timestamp(date_str):
     """Converte a data no padrão de um objeto Event para uma timestamp.
@@ -446,7 +457,7 @@ class DataGrid():
                     end = self.size
                 # Número de caracteres no padrão ASCII, fs inicialmente guarda a frequência de elementos
                 # o elemento de valor n, é informado sua frequência na n+1-ésima entrada da lista fs
-                fs = [0] * (129)
+                fs = [0] * (63)
                 # Lista temporaria para inserir os valores ordenados
                 temp = [0] * (self.size)
                 for i in range(start, end):
@@ -456,15 +467,15 @@ class DataGrid():
                     except IndexError:
                         self.list[i].owner_id += " "
                     # Guardando caractere com seu valor ASCII
-                    fs[ord(self.list[i].owner_id[pos]) + 1] += 1
+                    fs[enumerated_alpha_numeric(self.list[i].owner_id[pos]) + 1] += 1
                 # Guardando a entrada que o número repetiu e quantas vezes ele repetiu
                 aux = []
-                for j in range(1,129):
+                for j in range(1,63):
                   # Se o caractere se repete
                   if fs[j]>1:
                     aux.append([j-1, fs[j]])
                 # Calculando onde cada elemento da lista começa e o espaço para guardar cada caractere 
-                for j in range(1,129):
+                for j in range(1,63):
                     fs[j]+=fs[j-1]
                 # Inicio da realocação de elementos
                 for i in range(start,end):
@@ -474,9 +485,8 @@ class DataGrid():
                         for k in aux:
                             aux_start.append(fs[k[0]] + start)
                     # Realocando elemento j
-                    j = ord(self.list[i].owner_id[pos])
+                    j = enumerated_alpha_numeric(self.list[i].owner_id[pos])
                     temp[fs[j] + start] = self.list[i]
-                    print(temp)
                     fs[j] += 1
                 for i in range(start,end):
                     # Realocando na lista original
@@ -521,7 +531,6 @@ class DataGrid():
                     # Realocando elemento j
                     j = ord(self.list[i].name[pos])
                     temp[fs[j] + start] = self.list[i]
-                    print(temp)
                     fs[j] += 1
                 for i in range(start,end):
                     # Realocando na lista original
