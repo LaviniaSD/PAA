@@ -347,15 +347,23 @@ class DataGrid():
     # def __radix_sort_3(self, column, direction="asc")
             #date
     def heapfy_max(self, n, i, column):
+        """
+        Implementa a operação de heapify para um heap máximo.
+
+        Args:
+            n (int): O tamanho do heap.
+            i (int): O índice do elemento a ser heapificado.
+            column (str): O nome da coluna usada como critério para a ordenação.
+        """
         inx = i
         left_inx = (i*2) + 1
         right_inx = (i*2) + 2
-        if column == "ID":
+        if column == "id":
             if (left_inx < n) and (self.list[left_inx].id > self.list[inx].id):
                 inx = left_inx
             if (right_inx < n) and (self.list[right_inx].id > self.list[inx].id):
                 inx = right_inx
-        elif column == "Count":
+        elif column == "count":
             if (left_inx < n) and (self.list[left_inx].count > self.list[inx].count):
                 inx = left_inx
             if (right_inx < n) and (self.list[right_inx].count > self.list[inx].count):
@@ -365,15 +373,23 @@ class DataGrid():
             self.heapfy_max(n, inx, column)
 
     def heapfy_min(self, n, i, column):
+        """
+        Implementa a operação de heapify para um heap mínimo.
+
+        Args:
+            n (int): O tamanho do heap.
+            i (int): O índice do elemento a ser heapificado.
+            column (str): O nome da coluna usada como critério para a ordenação.
+        """
         inx = i
         left_inx = (i*2) + 1
         right_inx = (i*2) + 2
-        if column == "ID":
+        if column == "id":
             if (left_inx < n) and (self.list[left_inx].id < self.list[inx].id):
                 inx = left_inx
             if (right_inx < n) and (self.list[right_inx].id < self.list[inx].id):
                 inx = right_inx
-        elif column == "Count":
+        elif column == "count":
             if (left_inx < n) and (self.list[left_inx].count < self.list[inx].count):
                 inx = left_inx
             if (right_inx < n) and (self.list[right_inx].count < self.list[inx].count):
@@ -383,6 +399,17 @@ class DataGrid():
             self.heapfy_min(n, inx, column)
     
     def build_heap(self, n, column, type_heap="max"):
+        """
+        Constrói um heap a partir de um DataGrid.
+
+        Args:
+            n (int): O tamanho do heap.
+            column (str): O nome da coluna usada como critério para a ordenação.
+            type_heap (str, optional): O tipo de heap a ser construído, "max" para heap máximo (padrão) ou "min" para heap mínimo.
+
+        Returns:
+            None
+        """
         for i in range((n//2)-1,-1,-1):
             if type_heap == "max":
                 self.heapfy_max(n, i, column)
@@ -390,6 +417,14 @@ class DataGrid():
                 self.heapfy_min(n, i, column)
 
     def heap_sort(self, n, column, direction="asc"):
+        """
+        Ordena um DataGrid usando o algoritmo Heap Sort.
+
+        Args:
+            n (int): O tamanho da entrada.
+            column (str): O nome da coluna usada como critério para a ordenação.
+            direction (str, optional): A direção da ordenação, "asc" para ascendente (padrão) ou "desc" para descendente.
+        """
         if direction == "asc":
             self.build_heap(n, column, "max")
         elif direction == "desc":
@@ -404,6 +439,18 @@ class DataGrid():
         self.direction = direction
 
     def radix_sort(self, pos, lim, column, start=0, end=-1, direction="asc"):
+        """
+        Ordena o DataGrid usando o algoritmo de ordenação Radix Sort.
+
+        Args:
+            pos (int): A posição do caractere a ser considerado durante a ordenação.
+            lim (int): O número de caracteres a serem considerados durante a ordenação.
+            column (str): O nome da coluna pela qual o DataGrid será ordenado.
+            start (int, optional): O índice inicial para a ordenação (padrão é 0).
+            end (int, optional): O índice final para a ordenação (padrão é -1, indicando o final da lista).
+            direction (str, optional): A direção da ordenação, "asc" para ascendente (padrão) ou "desc" para descendente.
+
+        """
         if direction == "asc":
             # Verificando se não passamos pelo número limite de repetições
             if lim > 0:
