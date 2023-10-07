@@ -1,5 +1,20 @@
 from datetime import datetime
 
+from timer import timeit, get_execution_time
+
+def enumerated_alpha_numeric(char):
+    alpha_numeric = {
+        "0": 0, "1": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, "9": 9,
+        "A": 10, "B": 11, "C": 12, "D": 13, "E": 14, "F": 15, "G": 16, "H": 17, "I": 18, "J": 19,
+        "K": 20, "L": 21, "M": 22, "N": 23, "O": 24, "P": 25, "Q": 26, "R": 27, "S": 28, "T": 29,
+        "U": 30, "V": 31, "W": 32, "X": 33, "Y": 34, "Z": 35,
+        "a": 36, "b": 37, "c": 38, "d": 39, "e": 40, "f": 41, "g": 42, "h": 43, "i": 44, "j": 45,
+        "k": 46, "l": 47, "m": 48, "n": 49, "o": 50, "p": 51, "q": 52, "r": 53, "s": 54, "t": 55,
+        "u": 56, "v": 57, "w": 58, "x": 59, "y": 60, "z": 61
+    }   
+
+    return alpha_numeric[char]
+
 def date_to_timestamp(date_str):
     """Converte a data no padrão de um objeto Event para uma timestamp.
 
@@ -42,8 +57,10 @@ class DataGrid():
         """
         self.list = []
         self.ordered_by = None
+        self.direction = None
         self.size = 0
 
+    @timeit
     def read_csv(self, filepath, separator=",",encoding="utf-8"):
         """Carrega os dados de um arquivo CSV para o DataGrid
 
@@ -53,7 +70,6 @@ class DataGrid():
             encoding (str, optional): codificação do arquivo. Defaults to "utf-8".
         
         """
-
         # Abrindo o arquivo CSV
         try:
             file = open(filepath, mode="r", encoding=encoding)
@@ -103,10 +119,11 @@ class DataGrid():
         Args:
             row (dict): dicionário contendo dados de uma linha do DataGrid, com o nome das colunas como chaves, e as entradas do DataGrid como valores.
         """
-        event = Event(**row)
+        event = Event(row)
         self.list.append(event)
         self.size += 1
         self.ordered_by = None
+        self.direction = None
     
     def delete_row(self, column, value):
         """Deleta uma linha do DataGrid
@@ -118,10 +135,18 @@ class DataGrid():
         new_list = []
         self.size = 0
 
-        for event in self.list:
-            if getattr(event, column) != value:
-                new_list.append(event)
-                self.size += 1
+        if column == "position":
+            i = 0
+            for event in self.list:
+                if i != value:
+                    new_list.append(event)
+                    self.size += 1
+                i += 1
+        else:
+            for event in self.list:
+                if getattr(event, column) != value:
+                    new_list.append(event)
+                    self.size += 1
         
         self.list = new_list
         
@@ -132,7 +157,6 @@ class DataGrid():
             start (int): índice inicial da impressão. 0, por padrão.
             end (int): índice final da impressão. 100, por padrão.
         """
-
         # Caso o índice inicial seja maior que o tamanho da lista, ou caso o índice inicial seja igual ao índice final, não há eventos para serem impressos
         if (start > self.size or start == end):
             print("Não há eventos para serem impressos")
@@ -166,101 +190,120 @@ class DataGrid():
         else:
             print("Índices fora dos limites da lista")
         
-        if self.ordered_by: self.ordered_by = None 
-
-    def insertion_sort(self, column, direction="asc"):
+        self.ordered_by = None 
+    
+    def insertion_sort(self, column="id", direction="asc"):
         """
         Ordena um datagrid usando o algoritmo de ordenação por inserção.
 
         Args:
-            column (str): O nome da coluna pela qual o datagrid será ordenado.
+            column (str, optional): O nome da coluna pela qual o datagrid será ordenado, "id" para ordenar na coluna ID.
             direction (str, optional): A direção da ordenação, "asc" para ascendente (padrão) ou "desc" para descendente.
         """
         # Tamanho da entrada
-        n = self.size
+        n = self.size        
         # Ordenanado em ordem crescente
-        if direction == "asc":
-            # Iniciando loop externo
-            for i in range(1,n):
-                current_value = self.list[i]
-                j = i-1
-                # Iniciando loop interno
-                if column == "ID":    
-                    while (self.list[j].id > current_value.id) and (j >= 0) :
-                        self.list[j+1] = self.list[j]
-                        # Atualizando j
-                        j -= 1
-                elif column == "Count":
-                    while (self.list[j].count > current_value.count) and (j >= 0) :
-                        self.list[j+1] = self.list[j]
-                        # Atualizando j
-                        j -= 1
-                self.list[j+1] = current_value
-        # Ordenanado em ordem decrescente
-        elif direction == "desc":
-            # Iniciando loop externo
-            for i in range(1,n):
-                current_value = self.list[i]
-                j = i-1
-                # Iniciando loop interno
-                if column == "ID":    
-                    while (self.list[j].id < current_value.id) and (j >= 0) :
-                        self.list[j+1] = self.list[j]
-                        # Atualizando j
-                        j -= 1
-                elif column == "Count":
-                    while (self.list[j].count < current_value.count) and (j >= 0) :
-                        self.list[j+1] = self.list[j]
-                        # Atualizando j
-                        j -= 1
-                self.list[j+1] = current_value
+        # Iniciando loop externo
+        for i in range(1,n):
+            current_value = self.list[i]
+            j = i-1
+            # Iniciando loop interno
+            if direction == "asc":
+              while (getattr(self.list[j], column) > getattr(current_value, column)) and (j >= 0) :
+                self.list[j+1] = self.list[j]
+                # Atualizando j
+                j -= 1
+            elif direction == "desc":
+              while (getattr(self.list[j], column) < getattr(current_value, column)) and (j >= 0) :
+                self.list[j+1] = self.list[j]
+                # Atualizando j
+                j -= 1
+            self.list[j+1] = current_value
+
+        self.direction = direction
         self.ordered_by = column
-    
-    def selection_sort(self, column, direction="asc"):
+    def selection_sort(self, column="id", direction="asc"):
         """
         Ordena o DataGrid usando o algoritmo de ordenação por seleção.
 
         Args:
-            column (str): O nome da coluna pela qual o DataGrid será ordenado.
+            column (str, optional): O nome da coluna pela qual o DataGrid será ordenado, "id" para ordenar na coluna ID.
             direction (str, optional): A direção da ordenação, "asc" para ascendente (padrão) ou "desc" para descendente.
         """
         # Tamanho da entrada
-        n = len(self.list)
-        # Ordenando em ordem crescente
-        if direction == "asc":
-            # Iniciando loop externo
-            for i in range(n-1):
-                min_inx = i
-                # Iniciando loop interno
-                for j in range(i+1,n):
-                    if column == "ID":
-                        if self.list[j].id < self.list[min_inx].id:
-                            min_inx = j
-                    elif column == "Count":
-                        if self.list[j].count < self.list[min_inx].count:
-                            min_inx = j
-                self.swap_row(i, min_inx)
-        # Ordenando em ordem decrescente
-        if direction == "desc":
-            # Iniciando loop externo
-            for i in range(n-1):
-                max_inx = i
-                # Iniciando loop interno
-                for j in range(i+1,n):
-                    if column == "ID":
-                        if self.list[j].id > self.list[max_inx].id:
-                            max_inx = j
-                    elif column == "Count":
-                        if self.list[j].count > self.list[max_inx].count:
-                            max_inx = j
-                self.swap_row(i, max_inx)     
-        self.ordered_by = column
+        n = self.size
+        # Iniciando loope externo
+        for i in range(n-1):
+            inx = i
+            # Iniciando loop interno
+            for j in range(i+1,n):
+                if direction == "asc":
+                    if getattr(self.list[j], column) < getattr(self.list[inx], column):
+                        inx = j
+                if direction == "desc":
+                    if getattr(self.list[j], column) > getattr(self.list[inx], column):
+                        inx = j
+            self.swap_row(i, inx) 
 
+        self.direction = direction
+        self.ordered_by = column
+    
     # def __quick_sort(self, column, direction="asc")
             #int
 
-    # def __merge_sort(self, column, direction="asc")
-            #
+    def merge_sort(self, column, direction = "asc", start = 0, end = None):
+        """Algoritmo merge_sort de complexidade O(n logn) para ordenar as linhas do DataGrid.
+
+        Args:
+            column (str): Nome da coluna que será usada para ordenação.
+            direction (str, optional): Direção de ordenação, 'asc' para crescente, 'desc' para decrescente. Defaults to "asc".
+            start (int, optional): Parâmetro para recursão. Índice de início da sublista a ser ordenada. Defaults to 0.
+            end (_type_, optional): Parâmetro para recursão. Índice de fim da sublista a ser ordenada. Defaults to None.
+        """
+        # Define método de comparação segundo tipo da coluna e direção
+        if direction == "asc":
+            if column == "id" or column == "count": compare = lambda x, y: x < y
+            else: compare = lambda x, y: string_lesser(x, y, len(x), len(y))
+        else:
+            if column == "id" or column == "count": compare = lambda x, y: x >= y
+            else: compare = lambda x, y: not string_lesser(x, y, len(x), len(y))
+        
+        # Define as divisões das sublistas
+        if end == None: end = self.size - 1
+        mid = int((end + start)/2)
+
+        # Chamada recursiva para ordenar as sublistas
+        if (mid - start) > 0: self.merge_sort(column, direction, start, mid)
+        if (end - mid) > 0: self.merge_sort(column, direction, mid+1, end)
+        
+        temp_list = [] # Lista temporária auxiliar
+        idx_left = start # Início da sublista esquerda
+        idx_right = mid+1 # Início da sublista direita
+
+        # Loop para merge das sublistas
+        while idx_left <= mid and idx_right <= end:
+            if compare(getattr(self.list[idx_left], column), getattr(self.list[idx_right], column)): 
+                temp_list.append(self.list[idx_left])
+                idx_left += 1
+            else: 
+                temp_list.append(self.list[idx_right])
+                idx_right += 1
+        
+        # Se sobrou algo na esquerda
+        while idx_left <= mid:
+            temp_list.append(self.list[idx_left])
+            idx_left += 1
+
+        # Se sobrou algo na direita
+        while idx_right <= end:
+            temp_list.append(self.list[idx_right])
+            idx_right += 1
+        
+        for i in range(start, end+1):
+            self.list[i] = temp_list[i-start]
+
+        self.direction = direction
+        self.ordered_by = column
 
     # def __radix_sort(self, column, direction="asc") 
             #owner
@@ -270,15 +313,184 @@ class DataGrid():
 
     # def __radix_sort_3(self, column, direction="asc")
             #date
-    # def __heap_sort(self, column, direction="asc")
-            #
+    def heapfy_max(self, n, i, column):
+        """
+        Implementa a operação de heapify para um heap máximo.
 
+        Args:
+            n (int): O tamanho do heap.
+            i (int): O índice do elemento a ser heapificado.
+            column (str): O nome da coluna usada como critério para a ordenação.
+        """
+        inx = i
+        left_inx = (i*2) + 1
+        right_inx = (i*2) + 2
+        # Descendo a árvore e comparando
+        if (left_inx < n) and (getattr(self.list[left_inx], column) > getattr(self.list[inx], column)):
+            inx = left_inx
+        if (right_inx < n) and (getattr(self.list[right_inx], column) > getattr(self.list[inx], column)):
+            inx = right_inx
+        if inx != i:
+            # Caso haja a necessidade de troca, troque o elemento com o nó filho
+            self.swap_row(i, inx)
+            # Faça a descidada novamente no nó filho
+            self.heapfy_max(n, inx, column)
+
+    def heapfy_min(self, n, i, column):
+        """
+        Implementa a operação de heapify para um heap mínimo.
+
+        Args:
+            n (int): O tamanho do heap.
+            i (int): O índice do elemento a ser heapificado.
+            column (str): O nome da coluna usada como critério para a ordenação.
+        """
+        inx = i
+        left_inx = (i*2) + 1
+        right_inx = (i*2) + 2
+        # Descendo a árvore e comparando
+        if (left_inx < n) and (getattr(self.list[left_inx], column) < getattr(self.list[inx], column)):
+            inx = left_inx
+        if (right_inx < n) and (getattr(self.list[right_inx], column) < getattr(self.list[inx], column)):
+            inx = right_inx
+        if inx != i:
+            # Caso haja a necessidade de troca, troque o elemento com o nó filho
+            self.swap_row(i, inx)
+            # Faça a descidada novamente no nó filho
+            self.heapfy_min(n, inx, column)
+
+    def build_heap(self, n, column, type_heap="max"):
+        """
+        Constrói um heap a partir de um DataGrid.
+
+        Args:
+            n (int): O tamanho do heap.
+            column (str): O nome da coluna usada como critério para a ordenação.
+            type_heap (str, optional): O tipo de heap a ser construído, "max" para heap máximo (padrão) ou "min" para heap mínimo.
+
+        Returns:
+            None
+        """
+        # Faça a alocação correta até a penúltima altura da árvore
+        for i in range((n//2)-1,-1,-1):
+            if type_heap == "max":
+                self.heapfy_max(n, i, column)
+            elif type_heap == "min":
+                self.heapfy_min(n, i, column)
+
+    def heap_sort(self, n, column = "id", direction="asc"):
+        """
+        Ordena um DataGrid usando o algoritmo Heap Sort.
+
+        Args:
+            n (int): O tamanho da entrada.
+            column (str, optional): O nome da coluna usada como critério para a ordenação, "id" para ordenar na coluna ID..
+            direction (str, optional): A direção da ordenação, "asc" para ascendente (padrão) ou "desc" para descendente.
+        """
+        if direction == "asc":
+            # Construindo heap
+            self.build_heap(n, column, "max")
+        elif direction == "desc":
+            self.build_heap(n, column, "min")
+        for i in range(n-1,0,-1):
+            # Ordene pela raiz da árvore
+            self.swap_row(0,i)
+            # Refaça o heap sem a raiz, ela foi jogada para o fim da lista e está ordenada
+            if direction == "asc":
+                self.heapfy_max(i, 0, column)
+            elif direction == "desc":
+                self.heapfy_min(i, 0, column)
+        self.ordered_by = column
+        self.direction = direction
+
+    def radix_sort(self, pos, lim, column, type_code="ASCII", start=0, end=-1, direction="asc"):
+        """
+        Ordena o DataGrid usando o algoritmo de ordenação Radix Sort.
+
+        Args:
+            pos (int): A posição do caractere a ser considerado durante a ordenação.
+            lim (int): O número de caracteres a serem considerados durante a ordenação.
+            column (str): O nome da coluna pela qual o DataGrid será ordenado.
+            type_code (str, optional): O tipo de enumeração que será usada para cara char, padrão ASCII.
+            start (int, optional): O índice inicial para a ordenação (padrão é 0).
+            end (int, optional): O índice final para a ordenação (padrão é -1, indicando o final da lista).
+            direction (str, optional): A direção da ordenação, "asc" para ascendente (padrão) ou "desc" para descendente.
+
+        """
+        # Verificando se não passamos pelo número limite de repetições
+        if lim > 0:
+            if type_code == "ASCII":
+                type_code_size = 128 
+            elif type_code == "alphanumeric":
+                type_code_size = 62
+            # Se não for dado o fim do datagrid, fazer o fim a última linha
+            if end == -1:
+                end = self.size
+            # Número de caracteres no padrão type_code, fs inicialmente guarda a frequência de elementos
+            # o elemento de valor n, é informado sua frequência na n+1-ésima entrada da lista fs
+            fs = [0] * (type_code_size + 1)
+            # Lista temporaria para inserir os valores ordenados
+            temp = [0] * (self.size)
+            for i in range(start, end):
+                # Caso uma palavra conter menos letras que outras
+                try:
+                    getattr(self.list[i], column)[pos]
+                except IndexError:
+                    current_value = getattr(self.list[i], column) 
+                    current_value += " "
+                # Guardando caractere com seu valor ASCII
+                if direction == "asc" and type_code == "ASCII": 
+                    fs[ord(getattr(self.list[i], column)[pos]) + 1] += 1
+                elif direction == "asc" and type_code == "alphanumeric": 
+                    fs[enumerated_alpha_numeric(getattr(self.list[i], column)[pos]) + 1] += 1
+                elif direction == "desc" and type_code == "ASCII": 
+                    fs[type_code_size - 1 - ord(getattr(self.list[i], column)[pos]) + 1] += 1
+                elif direction == "desc" and type_code == "alphanumeric": 
+                    fs[type_code_size - 1 - enumerated_alpha_numeric(getattr(self.list[i], column)[pos]) + 1] += 1
+            # Guardando a entrada que o número repetiu e quantas vezes ele repetiu
+            aux = []
+            for j in range(1,type_code_size + 1):
+              # Se o caractere se repete
+                if fs[j]>1:
+                    aux.append([j-1, fs[j]])
+            # Calculando onde cada elemento da lista começa e o espaço para guardar cada caractere 
+            for j in range(1,type_code_size + 1):
+                fs[j]+=fs[j-1]
+            # Inicio da realocação de elementos
+            for i in range(start,end):
+                if i == start:
+                # Inicio da recursão, onde o elemento que contém mais de uma repetição começa
+                    aux_start=[]
+                    for k in aux:
+                        aux_start.append(fs[k[0]] + start)
+                # Realocando elemento j
+                if direction == "asc" and type_code == "ASCII": 
+                    j = ord(getattr(self.list[i], column)[pos])
+                elif direction == "asc" and type_code == "alphanumeric": 
+                    j = enumerated_alpha_numeric(getattr(self.list[i], column)[pos])
+                elif direction == "desc" and type_code == "ASCII": 
+                    j = type_code_size  -1 - ord(getattr(self.list[i], column)[pos])
+                elif direction == "desc" and type_code == "alphanumeric": 
+                    j = type_code_size -1 - enumerated_alpha_numeric(getattr(self.list[i], column)[pos])
+                temp[fs[j] + start] = self.list[i]
+                fs[j] += 1
+            for i in range(start,end):
+                # Realocando na lista original
+                self.list[i] = temp[i]
+            # Se tiver caracteres repetidos na posição
+            if len(aux) != 0:
+                for k in range(len(aux)):
+                    self.radix_sort(pos+1, lim-1, column, type_code, aux_start[k], aux_start[k] + aux[k][1], direction)
+        self.ordered_by = column
+        self.direction = direction
+
+    # TODO: sort precisa de um parâmetro que decide qual algoritmo usar
     #def sort(self, column, direction="asc"):
     #   if column == "ID" or column == "Count":
     #        return self.__quick_sort(column, direction)
 
-    def __id_binary_search(self, column, value):
-        """Busca binária para valores de 'id' de objetos Event.
+    def __exact_binary_search(self, column, value):
+        """Busca binária para valores de 'id' ou 'owner_id' de objetos Event.
         Método auxiliar a __exact_search().
 
         Args:
@@ -288,6 +500,13 @@ class DataGrid():
         Returns:
             int | None: Índice do evento correspondente ao valor buscado no DataGrid, ou None se não existe.
         """
+        if self.direction == "asc":
+            if column == "id": compare = lambda x, y: x < y
+            else: compare = lambda x, y: string_lesser(x, y, len(x), len(y))
+        elif self.direction == "desc":
+            if column == "id": compare = lambda x, y: x > y
+            else: compare = lambda x, y: not string_lesser(x, y, len(x), len(y))
+
         start = 0
         end = self.size - 1
         mid = int(end/2)
@@ -295,42 +514,16 @@ class DataGrid():
         while start != end: 
             if getattr(self.list[mid], column) == value: return mid # Foi encontrado
         
-            if getattr(self.list[mid], column) < value: start = mid
+            if compare(getattr(self.list[mid], column), value): start = mid
             else: end = mid
 
             mid = int(start + (end - start)/2)
             
         if getattr(self.list[mid], column) == value: return mid
         return None # Não foi encontrado
-    
-    def __owner_binary_search(self, column, value):
-        """Busca binária para valores de 'owner_id' de objetos Event.
-        Método auxiliar a __exact_search().
-
-        Args:
-            column (str): Nome da coluna que está sendo buscada.
-            value (int): Valor procurado.
-
-        Returns:
-            int | None: Índice do evento correspondente ao valor buscado no DataGrid, ou None se não existe.
-        """
-        start = 0
-        end = self.size - 1
-        mid = int(end/2)
-
-        while start != end: 
-            if getattr(self.list[mid], column) == value: return mid # Foi encontrado
-        
-            if string_lesser(getattr(self.list[mid], column), value, 5, 5): start = mid
-            else: end = mid
-
-            mid = int(start + (end - start)/2)
-        
-        if getattr(self.list[mid], column) == value: return mid
-        return None # Não foi encontrado
 
     def __exact_search(self, column, value):
-        """Busca por valores numéricos no DataGrid.
+        """Busca por valores exatos no DataGrid.
         Método auxiliar a search().
 
         Args:
@@ -342,10 +535,8 @@ class DataGrid():
         """
         # Se estiver ordenado pela coluna que estamos buscando, implementa a binary search
         if self.ordered_by == column:
-            if column == "id":
-                return self.__id_binary_search(column, value)
-            elif column == "owner_id":
-                return self.__owner_binary_search(column, value)
+            if column == "id" or column == "owner_id":
+                return self.__exact_binary_search(column, value)
 
         # Se não, faça busca linear
         for idx in range(self.size):
@@ -365,9 +556,6 @@ class DataGrid():
         Returns:
             list: Lista de índices dos elementos do DataGrid que pertencem ao intervalo desejado.
         """
-        # Casos em que é impossível o intervalo existir no datagrid
-        if getattr(self.list[self.size-1], column) < value[0] or getattr(self.list[0], column) > value[1]: return []
-
         # Se procurar por data, usa timestamp ao invés da string
         if column == "creation_date": 
             column = "timestamp"
@@ -376,50 +564,94 @@ class DataGrid():
         start = 0
         end = self.size - 1
         mid = int(end/2)
+        
+        if self.direction == "asc":
+            # Loop para encontrar o limite inferior
+            while start != end: 
+                cur_val = getattr(self.list[mid], column)
 
-        # Loop para encontrar o limite inferior
-        while start != end: 
-            cur_val = getattr(self.list[mid], column)
+                # Se encontramos exatamente o limite inferior do intervalo, garantimos que abrangimos todas as suas duplicatas e quebramos o loop
+                if cur_val == value[0]: 
+                    while getattr(self.list[mid-1], column) == value[0]: mid -= 1
+                    break
+                
+                if cur_val < value[0]: start = mid
+                else: end = mid
 
-            # Se encontramos exatamente o limite inferior do intervalo, garantimos que abrangimos todas as suas duplicatas e quebramos o loop
-            if cur_val == value[0]: 
-                while getattr(self.list[mid-1], column) == value[0]: mid -= 1
-                break
-            
-            if cur_val < value[0]: start = mid
-            else: end = mid
+                mid = int(start + (end - start)/2)
 
-            mid = int(start + (end - start)/2)
+            if getattr(self.list[mid], column) < value[0]: mid += 1
+            if getattr(self.list[mid], column) > value[1]: return [] # Caso em que o intervalo não existe
 
-        if getattr(self.list[mid], column) < value[0]: mid += 1
-        if getattr(self.list[mid], column) > value[1]: return [] # Caso em que o intervalo não existe
+            # Nesse momento, mid é o índice do primeiro elemento do grid que pertence ao intervalo
+            first = mid
 
-        # Nesse momento, mid é o índice do primeiro elemento do grid que pertence ao intervalo
-        first = mid
+            start = first # Não precisamos procurar o limite superior do intervalo antes do inferior
+            end = self.size - 1
+            mid = int((end+start)/2)
 
-        start = first # Não precisamos procurar o limite superior do intervalo antes do inferior
-        end = self.size - 1
-        mid = int(end/2)
+            # Loop para encontrar o limite superior
+            while start != end:
+                cur_val = getattr(self.list[mid], column)
 
-        # Loop para encontrar o limite superior
-        while start != end:
-            cur_val = getattr(self.list[mid], column)
+                # Se encontramos exatamente o limite superior do intervalo, garantimos que abrangimos todas as suas duplicatas e quebramos o loop
+                if cur_val == value[1]: 
+                    while getattr(self.list[mid+1], column) == value[1]: mid += 1
+                    break
+                
+                if cur_val < value[1]: start = mid
+                else: end = mid
 
-            # Se encontramos exatamente o limite superior do intervalo, garantimos que abrangimos todas as suas duplicatas e quebramos o loop
-            if cur_val == value[1]: 
-                while getattr(self.list[mid+1], column) == value[1]: mid += 1
-                break
-            
-            if cur_val < value[1]: start = mid
-            else: end = mid
+                mid = int(start + (end - start)/2)
 
-            mid = int(start + (end - start)/2)
+            if getattr(self.list[mid], column) > value[1]: mid -= 1
+            # Nesse momento, mid é o índice do último elemento do grid que pertence ao intervalo
+            last = mid
+            return range(first, last+1)
 
-        if getattr(self.list[mid], column) > value[1]: mid -= 1
-        # Nesse momento, mid é o índice do último elemento do grid que pertence ao intervalo
-        last = mid
+        elif self.direction == "desc":
+            # Loop para encontrar o limite inferior
+            while start != end: 
+                cur_val = getattr(self.list[mid], column)
 
-        return range(first, last+1)
+                # Se encontramos exatamente o limite inferior do intervalo, garantimos que abrangimos todas as suas duplicatas e quebramos o loop
+                if cur_val == value[0]: 
+                    while getattr(self.list[mid-1], column) == value[0]: mid += 1
+                    break
+                
+                if cur_val < value[0]: end = mid
+                else: start = mid
+
+                mid = int(start + (end - start)/2)
+
+            if getattr(self.list[mid], column) < value[0]: mid -= 1
+            if getattr(self.list[mid], column) > value[1]: return [] # Caso em que o intervalo não existe
+
+            # Nesse momento, mid é o índice do último elemento do grid que pertence ao intervalo
+            first = mid
+
+            start = 0 
+            end = first # Não precisamos procurar o limite superior do intervalo depois do inferior
+            mid = int((end+start)/2)
+
+            # Loop para encontrar o limite superior
+            while start != end:
+                cur_val = getattr(self.list[mid], column)
+
+                # Se encontramos exatamente o limite superior do intervalo, garantimos que abrangimos todas as suas duplicatas e quebramos o loop
+                if cur_val == value[1]: 
+                    while getattr(self.list[mid+1], column) == value[1]: mid -= 1
+                    break
+                
+                if cur_val < value[1]: end = mid
+                else: start = mid
+
+                mid = int(start + (end - start)/2)
+
+            if getattr(self.list[mid], column) > value[1]: mid += 1
+            # Nesse momento, mid é o índice do último elemento do grid que pertence ao intervalo
+            last = mid
+            return range(last, first+1)
 
     def __interval_search(self, column, value):
         """Busca de valores pertencentes a um intervalo no DataGrid.
@@ -497,42 +729,36 @@ class DataGrid():
             value (int | str | tuple): Valor que será buscado na coluna passada. O tipo do parâmetro deve ser coerente com o tipo de busca da coluna passada.
 
         Returns:
-            _type_: _description_
+            DataGrid: Novo DataGrid contendo os Events que correspondem à busca. 
         """
+        result = DataGrid() 
+
         # Busca exata
         if column == "id" or column == "owner_id":
             idx = self.__exact_search(column, value)
             
-            if idx == None: return None
-
-            result = DataGrid()
-            result.list.append(self.list[idx])
-            result.size += 1
-            return result
-
+            if idx != None: 
+                result.list.append(self.list[idx])
+                result.size += 1
+            
         # Busca por intervalo
         elif column == "creation_date" or column == "count":
             idx_list = self.__interval_search(column, value)
-            if len(idx_list) > 0:
-                result = DataGrid()
-                for i in idx_list:
-                    result.list.append(self.list[i])
-                    result.size += 1
-                return result
+            
+            for i in idx_list:
+                result.list.append(self.list[i])
+                result.size += 1
         
         # Busca por conteúdo
         elif column == "name" or column == "content":
             idx_list = self.__contain_search(column, value)
             
-            if len(idx_list) > 0:
-                result = DataGrid()
-                for i in idx_list:
-                    result.list.append(self.list[i])
-                    result.size += 1
-                return result
+            for i in idx_list:
+                result.list.append(self.list[i])
+                result.size += 1
 
-        return None # Pior caso: busca não encontrou nada
-    
+        return result
+        
     def copy(self):
         """Produz uma deep copy do datagrid       
         """
@@ -543,9 +769,12 @@ class DataGrid():
 
         # Copia os atributos
         new_datagrid.ordered_by = self.ordered_by
+        new_datagrid.direction = self.direction
         new_datagrid.size = self.size
 
         return new_datagrid
+    
+    # TODO: implementar o MOM de acordo com a função sort (a partir do momento q ela reconhecer o melhor algoritmo para cada ordenação)
     
     def __quick_select(self, datagrid, l, r, k):
         """Encontra o k-ésimo menor elemento do DataGrid através do algoritmo de Quick Select
@@ -586,6 +815,7 @@ class DataGrid():
         else:
             return self.__quick_select(datagrid, j+1, r, k)
         
+    @timeit
     def select_count(self, i, j):
         """Seleciona um intervalo de entradas do DataGrid com base na coluna count ordenada de forma crescente.
 
@@ -599,7 +829,11 @@ class DataGrid():
 
             datagrid_selected = DataGrid()
 
-            datagrid_selected.list = self.list[i:j+1]
+            if self.direction == "asc":
+                datagrid_selected.list = self.list[i:j+1]
+            else:
+                datagrid_selected.list = self.list[self.size-(i)-1 : self.size-(j+1)-1 : -1]
+
             return datagrid_selected
         
         # Caso contrário, usamos quickselect para encontrar o i-ésimo e o j-ésimo menor elemento
@@ -683,10 +917,10 @@ if __name__ == "__main__":
 
     datagrid.show()
     
-    print("Após deletar o evento 2")
+    print("Após deletar o evento 2 pela sua posição")
 
     # Deletar um evento
-    datagrid.delete_row("id", 2)
+    datagrid.delete_row("position", 0)
 
     # Verificar o conteúdo do DataGrid
     datagrid.show()
@@ -716,14 +950,45 @@ if __name__ == "__main__":
 
     # Carregando dados a partir de um CSV
     datagrid_csv = DataGrid()
-    datagrid_csv.read_csv("data/sample.csv")
+    datagrid_csv.read_csv("data/dados_gerados.csv", ";")
     datagrid_csv.show()
 
     print("select_count(2, 5) para um vetor não ordenado")
-    print("Ordenação:", datagrid_csv.ordered_by)
-    datagrid_csv.select_count(2, 5).show()
+    print(f"Ordenação: {datagrid_csv.ordered_by}")
+    # datagrid_csv.select_count(2, 5).show()
+    datagrid_csv.select_count(2, 5)
+    
+    get_execution_time("select_count", True)
 
-    print("select_count(2, 5) para um vetor ordenado")
+    print("select_count(2, 5) para um vetor ordenado (asc)")
     datagrid_csv.insertion_sort("Count")
+    print(f"Ordenação: {datagrid_csv.ordered_by} ({datagrid_csv.direction})")
+    # datagrid_csv.select_count(2, 5).show()
+    datagrid_csv.select_count(2, 5)
+    
+    get_execution_time("select_count", True)
+
+    print("select_count(2, 5) para um vetor ordenado (desc)")
+    datagrid_csv.insertion_sort("Count", "desc")
+    print(f"Ordenação: {datagrid_csv.ordered_by} ({datagrid_csv.direction})")
+    # datagrid_csv.select_count(2, 5).show()
+    datagrid_csv.select_count(2, 5)
+    
+    get_execution_time("select_count", True)
+
+    # TODO: implementar o decorador @timeit para as demais funções após discutir os métodos que receberão o decorador
+
+    print("Teste merge_sort por ID")
+    datagrid_csv.merge_sort("id")
     print("Ordenação:", datagrid_csv.ordered_by)
-    datagrid_csv.select_count(2, 5).show()
+    datagrid_csv.show()
+
+    print("Teste merge_sort por Owner ID")
+    datagrid_csv.merge_sort("owner_id")
+    print("Ordenação:", datagrid_csv.ordered_by)
+    datagrid_csv.show()
+
+    print("Teste merge_sort desc por creation_date")
+    datagrid_csv.merge_sort("creation_date", "desc")
+    print("Ordenação:", datagrid_csv.ordered_by)
+    datagrid_csv.show()
