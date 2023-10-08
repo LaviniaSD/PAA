@@ -112,7 +112,7 @@ class DataGrid():
                 else:
                     # Caso estejamos no cabeçalho, avançe para a primeira linha de dados
                     key_row = 1
-
+    @timeit
     def insert_row(self, row):
         """Insere uma linha no DataGrid
 
@@ -124,7 +124,7 @@ class DataGrid():
         self.size += 1
         self.ordered_by = None
         self.direction = None
-    
+    @timeit
     def delete_row(self, column, value):
         """Deleta uma linha do DataGrid
 
@@ -149,7 +149,8 @@ class DataGrid():
                     self.size += 1
         
         self.list = new_list
-        
+    
+    @timeit     
     def show(self, start=0, end=100):
         """Imprime o conteúdo do DataGrid (segundo o início e fim especificados)
 
@@ -174,7 +175,8 @@ class DataGrid():
 
         # Imprime uma linha ao final da tabela
         print()
-
+    
+    @timeit
     def swap_row(self, row_1, row_2):
         """
         Troca duas linhas na lista do DataGrid com base nos índices fornecidos.
@@ -191,6 +193,7 @@ class DataGrid():
             print("Índices fora dos limites da lista")
         
         self.ordered_by = None 
+    
     @timeit
     def insertion_sort(self, column="id", direction="asc"):
         """
@@ -222,6 +225,7 @@ class DataGrid():
 
         self.direction = direction
         self.ordered_by = column    
+    
     @timeit
     def selection_sort(self, column="id", direction="asc"):
         """
@@ -251,7 +255,8 @@ class DataGrid():
     
     # def __quick_sort(self, column, direction="asc")
             #int
-
+    
+    @timeit
     def merge_sort(self, column, direction = "asc", start = 0, end = None):
         """Algoritmo merge_sort de complexidade O(n logn) para ordenar as linhas do DataGrid.
 
@@ -306,14 +311,8 @@ class DataGrid():
         self.direction = direction
         self.ordered_by = column
 
-    # def __radix_sort(self, column, direction="asc") 
-            #owner
-
-    # def __radix_sort_2(self, column, direction="asc")
-            #name, content
-
-    # def __radix_sort_3(self, column, direction="asc")
-            #date
+    
+    @timeit    
     def heapfy_max(self, n, i, column):
         """
         Implementa a operação de heapify para um heap máximo.
@@ -336,7 +335,8 @@ class DataGrid():
             self.swap_row(i, inx)
             # Faça a descidada novamente no nó filho
             self.heapfy_max(n, inx, column)
-
+    
+    @timeit
     def heapfy_min(self, n, i, column):
         """
         Implementa a operação de heapify para um heap mínimo.
@@ -359,7 +359,8 @@ class DataGrid():
             self.swap_row(i, inx)
             # Faça a descidada novamente no nó filho
             self.heapfy_min(n, inx, column)
-
+    
+    @timeit
     def build_heap(self, n, column, type_heap="max"):
         """
         Constrói um heap a partir de um DataGrid.
@@ -378,7 +379,8 @@ class DataGrid():
                 self.heapfy_max(n, i, column)
             elif type_heap == "min":
                 self.heapfy_min(n, i, column)
-
+    
+    @timeit
     def heap_sort(self, n, column = "id", direction="asc"):
         """
         Ordena um DataGrid usando o algoritmo Heap Sort.
@@ -404,7 +406,8 @@ class DataGrid():
         self.ordered_by = column
         self.direction = direction
 
-    def radix_sort(self, pos, lim, column, type_code="ASCII", start=0, end=-1, direction="asc"):
+    @timeit
+    def radix_sort(self, pos, column, type_code="ASCII", start=0, end=-1, direction="asc", not_sort = True):
         """
         Ordena o DataGrid usando o algoritmo de ordenação Radix Sort.
 
@@ -418,8 +421,11 @@ class DataGrid():
             direction (str, optional): A direção da ordenação, "asc" para ascendente (padrão) ou "desc" para descendente.
 
         """
+
         # Verificando se não passamos pelo número limite de repetições
-        if lim > 0:
+        if not_sort:
+            print("loop: ", pos)
+            not_sort = False
             if type_code == "ASCII":
                 type_code_size = 128 
             elif type_code == "alphanumeric":
@@ -437,14 +443,16 @@ class DataGrid():
                 try:
                     getattr(self.list[i], column)[pos]
                 except IndexError:
-                    current_value = getattr(self.list[i], column) 
-                    current_value += " "
+                    palavra_atual = getattr(self.list[i], column)
+                    # Adiciona um espaço ao final da palavra se necessário
+                    if len(palavra_atual) < pos + 1:
+                        setattr(self.list[i], column, palavra_atual + " ")
                 # Guardando caractere com seu valor ASCII
                 if direction == "asc" and type_code == "ASCII": 
                     fs[ord(getattr(self.list[i], column)[pos]) + 1] += 1
                 elif direction == "asc" and type_code == "alphanumeric": 
                     fs[enumerated_alpha_numeric(getattr(self.list[i], column)[pos]) + 1] += 1
-                elif direction == "desc" and type_code == "ASCII": 
+                elif direction == "desc" and type_code == "ASCII":
                     fs[type_code_size - 1 - ord(getattr(self.list[i], column)[pos]) + 1] += 1
                 elif direction == "desc" and type_code == "alphanumeric": 
                     fs[type_code_size - 1 - enumerated_alpha_numeric(getattr(self.list[i], column)[pos]) + 1] += 1
@@ -476,12 +484,14 @@ class DataGrid():
                 temp[fs[j] + start] = self.list[i]
                 fs[j] += 1
             for i in range(start,end):
-                # Realocando na lista original
-                self.list[i] = temp[i]
+                if self.list[i] != temp[i]:
+                    # Realocando na lista original
+                    self.list[i] = temp[i]
+                    not_sort = True
             # Se tiver caracteres repetidos na posição
             if len(aux) != 0:
                 for k in range(len(aux)):
-                    self.radix_sort(pos+1, lim-1, column, type_code, aux_start[k], aux_start[k] + aux[k][1], direction)
+                    self.radix_sort(pos+1, column, type_code, aux_start[k], aux_start[k] + aux[k][1], direction, not_sort = not_sort)
         self.ordered_by = column
         self.direction = direction
 
@@ -490,6 +500,7 @@ class DataGrid():
     #   if column == "ID" or column == "Count":
     #        return self.__quick_sort(column, direction)
 
+    @timeit
     def __exact_binary_search(self, column, value):
         """Busca binária para valores de 'id' ou 'owner_id' de objetos Event.
         Método auxiliar a __exact_search().
@@ -522,7 +533,8 @@ class DataGrid():
             
         if getattr(self.list[mid], column) == value: return mid
         return None # Não foi encontrado
-
+    
+    @timeit
     def __exact_search(self, column, value):
         """Busca por valores exatos no DataGrid.
         Método auxiliar a search().
@@ -545,7 +557,8 @@ class DataGrid():
                 return idx
         
         return None # Pior caso: não foi encontrado
-
+    
+    @timeit
     def __interval_binary_search(self, column, value):
         """Busca binária para valores pertencentes a um intervalo no DataGrid.
         Método auxiliar de __interval_search().
@@ -653,7 +666,8 @@ class DataGrid():
             # Nesse momento, mid é o índice do último elemento do grid que pertence ao intervalo
             last = mid
             return range(last, first+1)
-
+    
+    @timeit
     def __interval_search(self, column, value):
         """Busca de valores pertencentes a um intervalo no DataGrid.
         Método auxiliar de search().
@@ -682,6 +696,7 @@ class DataGrid():
                 result.append(idx)
         return result
     
+    @timeit
     def __contain(self, str1, str2, str2_len):
         """Verifica se a string str1 contém str2.
 
@@ -703,7 +718,8 @@ class DataGrid():
             if matches == str2_len: 
                 return True
         return False
-
+    
+    @timeit
     def __contain_search(self, column, value):
         """Busca por Events cujas entradas contenham o value passado.
 
@@ -722,6 +738,7 @@ class DataGrid():
                 result.append(idx)
         return result
 
+    @timeit
     def search(self, column, value):
         """Busca pelo valor desejado na coluna desejada.
 
@@ -759,7 +776,8 @@ class DataGrid():
                 result.size += 1
 
         return result
-        
+
+    @timeit
     def copy(self):
         """Produz uma deep copy do datagrid       
         """
@@ -776,7 +794,8 @@ class DataGrid():
         return new_datagrid
     
     # TODO: implementar o MOM de acordo com a função sort (a partir do momento q ela reconhecer o melhor algoritmo para cada ordenação)
-    
+
+    @timeit
     def __quick_select(self, datagrid, l, r, k):
         """Encontra o k-ésimo menor elemento do DataGrid através do algoritmo de Quick Select
         

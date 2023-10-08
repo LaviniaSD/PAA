@@ -32,10 +32,8 @@ def timeit(func, dict_list=False):
         # Calcula o tempo de execução da função decorada e armazena em um dicionário global
         duration = (end_time - start_time)
         # duration = (end_time - start_time)
-        if dict_list:
-            _execution_times[func.__name__] = [duration]
-        else: 
-            _execution_times[func.__name__] = duration
+
+        _execution_times[func.__name__] = duration
         return result
 
     return wrapper
