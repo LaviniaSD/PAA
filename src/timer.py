@@ -1,4 +1,6 @@
 import time
+import sys
+sys.setrecursionlimit(10**6) 
 
 # Dicionário global para armazenar os tempos de execução das funções decoradas
 _execution_times = {}

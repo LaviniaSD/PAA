@@ -2,6 +2,9 @@ from datetime import datetime
 
 from timer import timeit, get_execution_time
 
+import sys
+sys.setrecursionlimit(10**6) 
+
 def enumerated_alpha_numeric(char):
     alpha_numeric = {
         "0": 0, "1": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, "9": 9,
@@ -12,8 +15,10 @@ def enumerated_alpha_numeric(char):
         "k": 46, "l": 47, "m": 48, "n": 49, "o": 50, "p": 51, "q": 52, "r": 53, "s": 54, "t": 55,
         "u": 56, "v": 57, "w": 58, "x": 59, "y": 60, "z": 61
     }   
-
     return alpha_numeric[char]
+def enumerated_date(char):
+    date_type = {"0": 0, "1": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, "9": 9, " ": 0, ":": 0, "/": 0}
+    return date_type[char]
 
 def date_to_timestamp(date_str):
     """Converte a data no padrão de um objeto Event para uma timestamp.
@@ -117,9 +122,12 @@ class DataGrid():
         """Insere uma linha no DataGrid
 
         Args:
-            row (dict): dicionário contendo dados de uma linha do DataGrid, com o nome das colunas como chaves, e as entradas do DataGrid como valores.
+            row (dict/Event): dicionário contendo dados de uma linha do DataGrid, com o nome das colunas como chaves, e as entradas do DataGrid como valores.
         """
-        event = Event(row)
+        if type(row) != Event:
+            event = Event(row)
+        else:
+            event = row
         self.list.append(event)
         self.size += 1
         self.ordered_by = None
@@ -203,6 +211,9 @@ class DataGrid():
             column (str, optional): O nome da coluna pela qual o datagrid será ordenado, "id" para ordenar na coluna ID.
             direction (str, optional): A direção da ordenação, "asc" para ascendente (padrão) ou "desc" para descendente.
         """
+        if column == "owner_id" or column == "creation_date" or column == "name" or column  == "content":
+            raise TypeError
+
         # Tamanho da entrada
         n = self.size        
         # Ordenanado em ordem crescente
@@ -235,6 +246,8 @@ class DataGrid():
             column (str, optional): O nome da coluna pela qual o DataGrid será ordenado, "id" para ordenar na coluna ID.
             direction (str, optional): A direção da ordenação, "asc" para ascendente (padrão) ou "desc" para descendente.
         """
+        if column == "owner_id" or column == "creation_date" or column == "name" or column  == "content":
+            raise TypeError
         # Tamanho da entrada
         n = self.size
         # Iniciando loope externo
@@ -253,9 +266,6 @@ class DataGrid():
         self.direction = direction
         self.ordered_by = column
     
-    # def __quick_sort(self, column, direction="asc")
-            #int
-    
     @timeit
     def merge_sort(self, column, direction = "asc", start = 0, end = None):
         """Algoritmo merge_sort de complexidade O(n logn) para ordenar as linhas do DataGrid.
@@ -266,12 +276,14 @@ class DataGrid():
             start (int, optional): Parâmetro para recursão. Índice de início da sublista a ser ordenada. Defaults to 0.
             end (_type_, optional): Parâmetro para recursão. Índice de fim da sublista a ser ordenada. Defaults to None.
         """
+        if column == "owner_id" or column == "creation_date" or column == "name" or column  == "content":
+            raise TypeError
         # Define método de comparação segundo tipo da coluna e direção
         if direction == "asc":
-            if column == "id" or column == "count": compare = lambda x, y: x < y
+            if column == "id" or column == "count" or column == "timestamp": compare = lambda x, y: x < y
             else: compare = lambda x, y: string_lesser(x, y, len(x), len(y))
         else:
-            if column == "id" or column == "count": compare = lambda x, y: x >= y
+            if column == "id" or column == "count" or column == "timestamp": compare = lambda x, y: x >= y
             else: compare = lambda x, y: not string_lesser(x, y, len(x), len(y))
         
         # Define as divisões das sublistas
@@ -311,7 +323,60 @@ class DataGrid():
         self.direction = direction
         self.ordered_by = column
 
-    
+    @timeit    
+    def quick_sort(self, column="id", direction="asc"):
+        """
+        Ordena o DataGrid usando o algoritmo de ordenação quicksort.
+
+        Args:
+            column (str, optional): O nome da coluna pela qual o DataGrid será ordenado, "id" para ordenar na coluna ID.
+            direction (str, optional): A direção da ordenação, "asc" para ascendente (padrão) ou "desc" para descendente.
+        """
+        if column == "owner_id" or column == "creation_date" or column == "name" or column  == "content":
+            raise TypeError
+
+        def partition(low, high):
+            """
+            Particiona o DataGrid em duas partes, uma com valores menores que o pivô e outra com valores maiores que o pivô.
+            
+            Args:
+                low (int): O índice inicial da partição.
+                high (int): O índice final da partição.
+            """
+                        # Pivô
+            pivot = getattr(self.list[high], column)
+            i = low - 1
+
+            # Loop para percorrer a lista
+            for j in range(low, high):
+                # Se o elemento atual for menor que o pivô ou se a ordenação for decrescente e o elemento atual for maior que o pivô
+                if direction == "asc" and getattr(self.list[j], column) <= pivot or \
+                   direction == "desc" and getattr(self.list[j], column) >= pivot:
+                    # Incrementa o índice do menor elemento
+                    i = i + 1
+                    # Troca os elementos
+                    self.swap_row(i, j)
+            # Troca o pivô com o elemento na posição correta    
+            self.swap_row(i + 1, high)
+            return i + 1
+        
+        # Função recursiva para ordenar o DataGrid
+        def quick_sort_recursive(low, high):
+            # Se o índice inicial for menor que o índice final
+            if low < high:
+                # pi é o índice de partição
+                pi = partition(low, high)
+                # Chamada recursiva para ordenar as partições                    
+                quick_sort_recursive(low, pi - 1)
+                quick_sort_recursive(pi + 1, high)
+
+        n = self.size
+        # Chamada inicial da função recursiva
+        quick_sort_recursive(0, n - 1)
+
+        self.direction = direction
+        self.ordered_by = column
+        
     @timeit    
     def heapfy_max(self, n, i, column):
         """
@@ -322,6 +387,8 @@ class DataGrid():
             i (int): O índice do elemento a ser heapificado.
             column (str): O nome da coluna usada como critério para a ordenação.
         """
+        if column == "owner_id" or column == "creation_date" or column == "name" or column  == "content":
+            raise TypeError
         inx = i
         left_inx = (i*2) + 1
         right_inx = (i*2) + 2
@@ -407,7 +474,7 @@ class DataGrid():
         self.direction = direction
 
     @timeit
-    def radix_sort(self, pos, column, type_code="ASCII", start=0, end=-1, direction="asc", not_sort = True):
+    def radix_sort(self, pos, column, lim = 20, type_code="ASCII", start=0, end=-1, direction="asc", not_sort = True):
         """
         Ordena o DataGrid usando o algoritmo de ordenação Radix Sort.
 
@@ -419,17 +486,23 @@ class DataGrid():
             start (int, optional): O índice inicial para a ordenação (padrão é 0).
             end (int, optional): O índice final para a ordenação (padrão é -1, indicando o final da lista).
             direction (str, optional): A direção da ordenação, "asc" para ascendente (padrão) ou "desc" para descendente.
-
+            not_sort (bool): Boleano para lista ordenada ou não, (padrão) True, ou seja não está ordenada. 
         """
-
-        # Verificando se não passamos pelo número limite de repetições
-        if not_sort:
-            print("loop: ", pos)
+        if column == "id" or column == "count" or column == "timestamp":
+            raise TypeError
+        if column == "owner_id":
+            type_code = "alphanumeric"
+        if column == "creation_date":
+            type_code = "date_type"
+        # Verificando se a lista está ou não ordenada
+        if not_sort or lim > 0:
             not_sort = False
             if type_code == "ASCII":
                 type_code_size = 128 
             elif type_code == "alphanumeric":
                 type_code_size = 62
+            elif type_code == "date_type":
+                type_code_size = 13
             # Se não for dado o fim do datagrid, fazer o fim a última linha
             if end == -1:
                 end = self.size
@@ -452,10 +525,14 @@ class DataGrid():
                     fs[ord(getattr(self.list[i], column)[pos]) + 1] += 1
                 elif direction == "asc" and type_code == "alphanumeric": 
                     fs[enumerated_alpha_numeric(getattr(self.list[i], column)[pos]) + 1] += 1
+                elif direction == "asc" and type_code == "date_type": 
+                    fs[enumerated_date(getattr(self.list[i], column)[pos]) + 1] += 1
                 elif direction == "desc" and type_code == "ASCII":
                     fs[type_code_size - 1 - ord(getattr(self.list[i], column)[pos]) + 1] += 1
                 elif direction == "desc" and type_code == "alphanumeric": 
                     fs[type_code_size - 1 - enumerated_alpha_numeric(getattr(self.list[i], column)[pos]) + 1] += 1
+                elif direction == "desc" and type_code == "date_type": 
+                    fs[type_code_size - 1 - enumerated_date(getattr(self.list[i], column)[pos]) + 1] += 1
             # Guardando a entrada que o número repetiu e quantas vezes ele repetiu
             aux = []
             for j in range(1,type_code_size + 1):
@@ -477,10 +554,14 @@ class DataGrid():
                     j = ord(getattr(self.list[i], column)[pos])
                 elif direction == "asc" and type_code == "alphanumeric": 
                     j = enumerated_alpha_numeric(getattr(self.list[i], column)[pos])
+                elif direction == "asc" and type_code == "date_type": 
+                    j = enumerated_date(getattr(self.list[i], column)[pos])
                 elif direction == "desc" and type_code == "ASCII": 
                     j = type_code_size  -1 - ord(getattr(self.list[i], column)[pos])
                 elif direction == "desc" and type_code == "alphanumeric": 
                     j = type_code_size -1 - enumerated_alpha_numeric(getattr(self.list[i], column)[pos])
+                elif direction == "desc" and type_code == "date_type": 
+                    j = type_code_size -1 - enumerated_date(getattr(self.list[i], column)[pos])
                 temp[fs[j] + start] = self.list[i]
                 fs[j] += 1
             for i in range(start,end):
@@ -491,7 +572,7 @@ class DataGrid():
             # Se tiver caracteres repetidos na posição
             if len(aux) != 0:
                 for k in range(len(aux)):
-                    self.radix_sort(pos+1, column, type_code, aux_start[k], aux_start[k] + aux[k][1], direction, not_sort = not_sort)
+                    self.radix_sort(pos+1, column, lim-1, type_code, aux_start[k], aux_start[k] + aux[k][1], direction, not_sort = not_sort)
         self.ordered_by = column
         self.direction = direction
 
