@@ -267,6 +267,58 @@ class DataGrid():
         self.ordered_by = column
     
     @timeit
+    def quick_sort(self, column="id", direction="asc"):
+        """
+        Ordena o DataGrid usando o algoritmo de ordenação quicksort.
+
+        Args:
+            column (str, optional): O nome da coluna pela qual o DataGrid será ordenado, "id" para ordenar na coluna ID.
+            direction (str, optional): A direção da ordenação, "asc" para ascendente (padrão) ou "desc" para descendente.
+        """
+
+        def partition(low, high):
+            """
+            Particiona o DataGrid em duas partes, uma com valores menores que o pivô e outra com valores maiores que o pivô.
+            
+            Args:
+                low (int): O índice inicial da partição.
+                high (int): O índice final da partição.
+            """
+            # Pivô
+            pivot = getattr(self.list[high], column)
+            i = low - 1
+
+            # Loop para percorrer a lista
+            for j in range(low, high):
+                # Se o elemento atual for menor que o pivô ou se a ordenação for decrescente e o elemento atual for maior que o pivô
+                if direction == "asc" and getattr(self.list[j], column) <= pivot or \
+                   direction == "desc" and getattr(self.list[j], column) >= pivot:
+                    # Incrementa o índice do menor elemento
+                    i = i + 1
+                    # Troca os elementos
+                    self.swap_row(i, j)
+            # Troca o pivô com o elemento na posição correta    
+            self.swap_row(i + 1, high)
+            return i + 1
+        
+        # Função recursiva para ordenar o DataGrid
+        def quick_sort_recursive(low, high):
+            # Se o índice inicial for menor que o índice final
+            if low < high:
+                # pi é o índice de partição
+                pi = partition(low, high)
+                # Chamada recursiva para ordenar as partições                    
+                quick_sort_recursive(low, pi - 1)
+                quick_sort_recursive(pi + 1, high)
+
+        n = self.size
+        # Chamada inicial da função recursiva
+        quick_sort_recursive(0, n - 1)
+
+        self.direction = direction
+        self.ordered_by = column
+    
+    @timeit
     def merge_sort(self, column, direction = "asc", start = 0, end = None):
         """Algoritmo merge_sort de complexidade O(n logn) para ordenar as linhas do DataGrid.
 
