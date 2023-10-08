@@ -191,7 +191,7 @@ class DataGrid():
             print("Índices fora dos limites da lista")
         
         self.ordered_by = None 
-    
+    @timeit
     def insertion_sort(self, column="id", direction="asc"):
         """
         Ordena um datagrid usando o algoritmo de ordenação por inserção.
@@ -221,7 +221,8 @@ class DataGrid():
             self.list[j+1] = current_value
 
         self.direction = direction
-        self.ordered_by = column
+        self.ordered_by = column    
+    @timeit
     def selection_sort(self, column="id", direction="asc"):
         """
         Ordena o DataGrid usando o algoritmo de ordenação por seleção.
@@ -485,7 +486,7 @@ class DataGrid():
         self.direction = direction
 
     # TODO: sort precisa de um parâmetro que decide qual algoritmo usar
-    #def sort(self, column, direction="asc"):
+    #def sort(self, column, direction="asc", strategy="pattern"):
     #   if column == "ID" or column == "Count":
     #        return self.__quick_sort(column, direction)
 

@@ -3,7 +3,7 @@ import time
 # Dicionário global para armazenar os tempos de execução das funções decoradas
 _execution_times = {}
 
-def timeit(func):
+def timeit(func, dict_list=False):
     """Decorador para medir o tempo de execução de uma função.
 
     Args:
@@ -32,8 +32,10 @@ def timeit(func):
         # Calcula o tempo de execução da função decorada e armazena em um dicionário global
         duration = (end_time - start_time)
         # duration = (end_time - start_time)
-        _execution_times[func.__name__] = duration
-        
+        if dict_list:
+            _execution_times[func.__name__] = [duration]
+        else: 
+            _execution_times[func.__name__] = duration
         return result
 
     return wrapper
