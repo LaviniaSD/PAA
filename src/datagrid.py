@@ -191,6 +191,32 @@ class DataGrid():
             print("Índices fora dos limites da lista")
         
         self.ordered_by = None 
+
+    def selection_sort(self, column="id", direction="asc"):
+        """
+        Ordena o DataGrid usando o algoritmo de ordenação por seleção.
+
+        Args:
+            column (str, optional): O nome da coluna pela qual o DataGrid será ordenado, "id" para ordenar na coluna ID.
+            direction (str, optional): A direção da ordenação, "asc" para ascendente (padrão) ou "desc" para descendente.
+        """
+        # Tamanho da entrada
+        n = self.size
+        # Iniciando loope externo
+        for i in range(n-1):
+            inx = i
+            # Iniciando loop interno
+            for j in range(i+1,n):
+                if direction == "asc":
+                    if getattr(self.list[j], column) < getattr(self.list[inx], column):
+                        inx = j
+                if direction == "desc":
+                    if getattr(self.list[j], column) > getattr(self.list[inx], column):
+                        inx = j
+            self.swap_row(i, inx) 
+
+        self.direction = direction
+        self.ordered_by = column
     
     def insertion_sort(self, column="id", direction="asc"):
         """
@@ -222,34 +248,57 @@ class DataGrid():
 
         self.direction = direction
         self.ordered_by = column
-    def selection_sort(self, column="id", direction="asc"):
+
+    def quick_sort(self, column="id", direction="asc"):
         """
-        Ordena o DataGrid usando o algoritmo de ordenação por seleção.
+        Ordena o DataGrid usando o algoritmo de ordenação quicksort.
 
         Args:
             column (str, optional): O nome da coluna pela qual o DataGrid será ordenado, "id" para ordenar na coluna ID.
             direction (str, optional): A direção da ordenação, "asc" para ascendente (padrão) ou "desc" para descendente.
         """
-        # Tamanho da entrada
+
+        def partition(low, high):
+            """
+            Particiona o DataGrid em duas partes, uma com valores menores que o pivô e outra com valores maiores que o pivô.
+            
+            Args:
+                low (int): O índice inicial da partição.
+                high (int): O índice final da partição.
+            """
+            # Pivô
+            pivot = getattr(self.list[high], column)
+            i = low - 1
+
+            # Loop para percorrer a lista
+            for j in range(low, high):
+                # Se o elemento atual for menor que o pivô ou se a ordenação for decrescente e o elemento atual for maior que o pivô
+                if direction == "asc" and getattr(self.list[j], column) <= pivot or \
+                   direction == "desc" and getattr(self.list[j], column) >= pivot:
+                    # Incrementa o índice do menor elemento
+                    i = i + 1
+                    # Troca os elementos
+                    self.swap_row(i, j)
+            # Troca o pivô com o elemento na posição correta    
+            self.swap_row(i + 1, high)
+            return i + 1
+        
+        # Função recursiva para ordenar o DataGrid
+        def quick_sort_recursive(low, high):
+            # Se o índice inicial for menor que o índice final
+            if low < high:
+                # pi é o índice de partição
+                pi = partition(low, high)
+                # Chamada recursiva para ordenar as partições                    
+                quick_sort_recursive(low, pi - 1)
+                quick_sort_recursive(pi + 1, high)
+
         n = self.size
-        # Iniciando loope externo
-        for i in range(n-1):
-            inx = i
-            # Iniciando loop interno
-            for j in range(i+1,n):
-                if direction == "asc":
-                    if getattr(self.list[j], column) < getattr(self.list[inx], column):
-                        inx = j
-                if direction == "desc":
-                    if getattr(self.list[j], column) > getattr(self.list[inx], column):
-                        inx = j
-            self.swap_row(i, inx) 
+        # Chamada inicial da função recursiva
+        quick_sort_recursive(0, n - 1)
 
         self.direction = direction
         self.ordered_by = column
-    
-    # def __quick_sort(self, column, direction="asc")
-            #int
 
     def merge_sort(self, column, direction = "asc", start = 0, end = None):
         """Algoritmo merge_sort de complexidade O(n logn) para ordenar as linhas do DataGrid.
@@ -898,6 +947,28 @@ if __name__ == "__main__":
     }
     datagrid.insert_row(data_dict2)
 
+    # Inserir outro evento com base em dicionário de tuplas
+    data_dict3 = {
+        "id": 3,
+        "owner_id": "ad125",
+        "creation_date": "2023/09/26 16:00:00",
+        "count": 25,
+        "name": "Evento 3",
+        "content": "Conteúdo do Evento 3"
+    }
+    datagrid.insert_row(data_dict3)
+
+    # Inserir outro evento com base em dicionário de tuplas
+    data_dict4 = {
+        "id": 4,
+        "owner_id": "ae126",
+        "creation_date": "2023/09/26 17:00:00",
+        "count": 25,
+        "name": "Evento 4",
+        "content": "Conteúdo do Evento 4"
+    }
+    datagrid.insert_row(data_dict4)
+    
     # Verificar o conteúdo do DataGrid
     datagrid.show()
 
@@ -908,87 +979,6 @@ if __name__ == "__main__":
     datagrid.show()
 
     print("Ordenando DataGrid pela coluna ID com Insertion Sort")
-    datagrid.insertion_sort("ID")
+    datagrid.quick_sort("id","desc")
 
     datagrid.show()
-
-    print("Ordenando de forma decrescente DataGrid pela coluna ID com Selection Sort")
-    datagrid.selection_sort("ID", "desc")
-
-    datagrid.show()
-    
-    print("Após deletar o evento 2 pela sua posição")
-
-    # Deletar um evento
-    datagrid.delete_row("position", 0)
-
-    # Verificar o conteúdo do DataGrid
-    datagrid.show()
-
-    print("Reinserindo evento 2 e buscando pelo evento 1")
-    
-    # Buscar por elemento
-    datagrid.insert_row(data_dict2)
-    datagrid.search("id", 1).show()
-    datagrid.search("owner_id", "ab123").show()
-
-    print("Buscando por conteúdo")
-    
-    # Buscar por strings que contém outra    
-    datagrid.search("content", "Conteúdo").show()
-    datagrid.search("name", "2").show()
-
-    print("Buscando por count entre 25 e 43")
-    
-    # Buscar por intervalo    
-    datagrid.search("count", (25,43)).show()
-    
-    print("Buscando por data entre 2023/09/26 14:00:01 e 2023/09/26 17:00:00")
-    
-    # Buscar por intervalo
-    datagrid.search("creation_date", ("2023/09/26 14:00:01", "2023/09/26 17:00:00")).show()
-
-    # Carregando dados a partir de um CSV
-    datagrid_csv = DataGrid()
-    datagrid_csv.read_csv("data/dados_gerados.csv", ";")
-    datagrid_csv.show()
-
-    print("select_count(2, 5) para um vetor não ordenado")
-    print(f"Ordenação: {datagrid_csv.ordered_by}")
-    # datagrid_csv.select_count(2, 5).show()
-    datagrid_csv.select_count(2, 5)
-    
-    get_execution_time("select_count", True)
-
-    print("select_count(2, 5) para um vetor ordenado (asc)")
-    datagrid_csv.insertion_sort("Count")
-    print(f"Ordenação: {datagrid_csv.ordered_by} ({datagrid_csv.direction})")
-    # datagrid_csv.select_count(2, 5).show()
-    datagrid_csv.select_count(2, 5)
-    
-    get_execution_time("select_count", True)
-
-    print("select_count(2, 5) para um vetor ordenado (desc)")
-    datagrid_csv.insertion_sort("Count", "desc")
-    print(f"Ordenação: {datagrid_csv.ordered_by} ({datagrid_csv.direction})")
-    # datagrid_csv.select_count(2, 5).show()
-    datagrid_csv.select_count(2, 5)
-    
-    get_execution_time("select_count", True)
-
-    # TODO: implementar o decorador @timeit para as demais funções após discutir os métodos que receberão o decorador
-
-    print("Teste merge_sort por ID")
-    datagrid_csv.merge_sort("id")
-    print("Ordenação:", datagrid_csv.ordered_by)
-    datagrid_csv.show()
-
-    print("Teste merge_sort por Owner ID")
-    datagrid_csv.merge_sort("owner_id")
-    print("Ordenação:", datagrid_csv.ordered_by)
-    datagrid_csv.show()
-
-    print("Teste merge_sort desc por creation_date")
-    datagrid_csv.merge_sort("creation_date", "desc")
-    print("Ordenação:", datagrid_csv.ordered_by)
-    datagrid_csv.show()
