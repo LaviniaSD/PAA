@@ -310,8 +310,7 @@ class DataGrid():
 
         self.direction = direction
         self.ordered_by = column
-
-    
+  
     @timeit    
     def heapfy_max(self, n, i, column):
         """
@@ -535,21 +534,21 @@ class DataGrid():
         return None # Não foi encontrado
     
     @timeit
-    def __exact_search(self, column, value):
+    def __exact_search(self, column, value, optimized):
         """Busca por valores exatos no DataGrid.
         Método auxiliar a search().
 
         Args:
             column (str): Nome da coluna que está sendo buscada.
             value (int | str): Valor procurado.
+            optimized (bool): Define a estratégia adotada pelo algoritmo.
 
         Returns:
             int | None: Índice do evento correspondente ao valor buscado no DataGrid, ou None se não existe.
         """
         # Se estiver ordenado pela coluna que estamos buscando, implementa a binary search
-        if self.ordered_by == column:
-            if column == "id" or column == "owner_id":
-                return self.__exact_binary_search(column, value)
+        if self.ordered_by == column and optimized:
+            return self.__exact_binary_search(column, value)
 
         # Se não, faça busca linear
         for idx in range(self.size):
@@ -668,19 +667,20 @@ class DataGrid():
             return range(last, first+1)
     
     @timeit
-    def __interval_search(self, column, value):
+    def __interval_search(self, column, value, optimized):
         """Busca de valores pertencentes a um intervalo no DataGrid.
         Método auxiliar de search().
 
         Args:
             column (str): Nome da coluna que está sendo buscada.
             value (tuple): Tupla com valores de início e fim do intervalo desejado, ambos inclusive.
+            optimized (bool): Define a estratégia adotada pelo algoritmo.
 
         Returns:
             list: Lista de índices dos elementos do DataGrid que pertencem ao intervalo desejado.
         """
         # Busca binária caso esteja ordenado
-        if self.ordered_by == column:
+        if self.ordered_by == column and optimized:
             return self.__interval_binary_search(column, value)
         
         # Se procurar por data, usa timestamp ao invés da string
@@ -726,6 +726,7 @@ class DataGrid():
         Args:
             column (str): Nome da coluna que está sendo buscada.
             value (str): Valor que deverá estar contido na entrada da coluna passada.
+            optimized (bool): Define a estratégia adotada pelo algoritmo.
 
         Returns:
             list: Lista de índices dos Events cujas entradas contêm o valor passado na coluna passada.
@@ -739,12 +740,14 @@ class DataGrid():
         return result
 
     @timeit
-    def search(self, column, value):
+    def search(self, column, value, optimized = True):
         """Busca pelo valor desejado na coluna desejada.
 
         Args:
             column (str): Nome da coluna onde será realizada a busca.
             value (int | str | tuple): Valor que será buscado na coluna passada. O tipo do parâmetro deve ser coerente com o tipo de busca da coluna passada.
+            optimized (bool, optional): Define a estratégia adotada pelo algoritmo. Por padrão, verifica se o DataGrid está ordenado na coluna pedida e aplica 
+            uma busca binária em caso afirmativo. Se for falso, esse parâmetro força a busca a ser sempre linear. Defaults to True. 
 
         Returns:
             DataGrid: Novo DataGrid contendo os Events que correspondem à busca. 
@@ -753,7 +756,7 @@ class DataGrid():
 
         # Busca exata
         if column == "id" or column == "owner_id":
-            idx = self.__exact_search(column, value)
+            idx = self.__exact_search(column, value, optimized)
             
             if idx != None: 
                 result.list.append(self.list[idx])
@@ -761,7 +764,7 @@ class DataGrid():
             
         # Busca por intervalo
         elif column == "creation_date" or column == "count":
-            idx_list = self.__interval_search(column, value)
+            idx_list = self.__interval_search(column, value, optimized)
             
             for i in idx_list:
                 result.list.append(self.list[i])
