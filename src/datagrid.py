@@ -322,61 +322,7 @@ class DataGrid():
 
         self.direction = direction
         self.ordered_by = column
-
-    @timeit    
-    def quick_sort(self, column="id", direction="asc"):
-        """
-        Ordena o DataGrid usando o algoritmo de ordenação quicksort.
-
-        Args:
-            column (str, optional): O nome da coluna pela qual o DataGrid será ordenado, "id" para ordenar na coluna ID.
-            direction (str, optional): A direção da ordenação, "asc" para ascendente (padrão) ou "desc" para descendente.
-        """
-        if column == "owner_id" or column == "creation_date" or column == "name" or column  == "content":
-            raise TypeError
-
-        def partition(low, high):
-            """
-            Particiona o DataGrid em duas partes, uma com valores menores que o pivô e outra com valores maiores que o pivô.
-            
-            Args:
-                low (int): O índice inicial da partição.
-                high (int): O índice final da partição.
-            """
-                        # Pivô
-            pivot = getattr(self.list[high], column)
-            i = low - 1
-
-            # Loop para percorrer a lista
-            for j in range(low, high):
-                # Se o elemento atual for menor que o pivô ou se a ordenação for decrescente e o elemento atual for maior que o pivô
-                if direction == "asc" and getattr(self.list[j], column) <= pivot or \
-                   direction == "desc" and getattr(self.list[j], column) >= pivot:
-                    # Incrementa o índice do menor elemento
-                    i = i + 1
-                    # Troca os elementos
-                    self.swap_row(i, j)
-            # Troca o pivô com o elemento na posição correta    
-            self.swap_row(i + 1, high)
-            return i + 1
-        
-        # Função recursiva para ordenar o DataGrid
-        def quick_sort_recursive(low, high):
-            # Se o índice inicial for menor que o índice final
-            if low < high:
-                # pi é o índice de partição
-                pi = partition(low, high)
-                # Chamada recursiva para ordenar as partições                    
-                quick_sort_recursive(low, pi - 1)
-                quick_sort_recursive(pi + 1, high)
-
-        n = self.size
-        # Chamada inicial da função recursiva
-        quick_sort_recursive(0, n - 1)
-
-        self.direction = direction
-        self.ordered_by = column
-        
+  
     @timeit    
     def heapfy_max(self, n, i, column):
         """
@@ -616,21 +562,21 @@ class DataGrid():
         return None # Não foi encontrado
     
     @timeit
-    def __exact_search(self, column, value):
+    def __exact_search(self, column, value, optimized):
         """Busca por valores exatos no DataGrid.
         Método auxiliar a search().
 
         Args:
             column (str): Nome da coluna que está sendo buscada.
             value (int | str): Valor procurado.
+            optimized (bool): Define a estratégia adotada pelo algoritmo.
 
         Returns:
             int | None: Índice do evento correspondente ao valor buscado no DataGrid, ou None se não existe.
         """
         # Se estiver ordenado pela coluna que estamos buscando, implementa a binary search
-        if self.ordered_by == column:
-            if column == "id" or column == "owner_id":
-                return self.__exact_binary_search(column, value)
+        if self.ordered_by == column and optimized:
+            return self.__exact_binary_search(column, value)
 
         # Se não, faça busca linear
         for idx in range(self.size):
@@ -749,19 +695,20 @@ class DataGrid():
             return range(last, first+1)
     
     @timeit
-    def __interval_search(self, column, value):
+    def __interval_search(self, column, value, optimized):
         """Busca de valores pertencentes a um intervalo no DataGrid.
         Método auxiliar de search().
 
         Args:
             column (str): Nome da coluna que está sendo buscada.
             value (tuple): Tupla com valores de início e fim do intervalo desejado, ambos inclusive.
+            optimized (bool): Define a estratégia adotada pelo algoritmo.
 
         Returns:
             list: Lista de índices dos elementos do DataGrid que pertencem ao intervalo desejado.
         """
         # Busca binária caso esteja ordenado
-        if self.ordered_by == column:
+        if self.ordered_by == column and optimized:
             return self.__interval_binary_search(column, value)
         
         # Se procurar por data, usa timestamp ao invés da string
@@ -807,6 +754,7 @@ class DataGrid():
         Args:
             column (str): Nome da coluna que está sendo buscada.
             value (str): Valor que deverá estar contido na entrada da coluna passada.
+            optimized (bool): Define a estratégia adotada pelo algoritmo.
 
         Returns:
             list: Lista de índices dos Events cujas entradas contêm o valor passado na coluna passada.
@@ -820,12 +768,14 @@ class DataGrid():
         return result
 
     @timeit
-    def search(self, column, value):
+    def search(self, column, value, optimized = True):
         """Busca pelo valor desejado na coluna desejada.
 
         Args:
             column (str): Nome da coluna onde será realizada a busca.
             value (int | str | tuple): Valor que será buscado na coluna passada. O tipo do parâmetro deve ser coerente com o tipo de busca da coluna passada.
+            optimized (bool, optional): Define a estratégia adotada pelo algoritmo. Por padrão, verifica se o DataGrid está ordenado na coluna pedida e aplica 
+            uma busca binária em caso afirmativo. Se for falso, esse parâmetro força a busca a ser sempre linear. Defaults to True. 
 
         Returns:
             DataGrid: Novo DataGrid contendo os Events que correspondem à busca. 
@@ -834,7 +784,7 @@ class DataGrid():
 
         # Busca exata
         if column == "id" or column == "owner_id":
-            idx = self.__exact_search(column, value)
+            idx = self.__exact_search(column, value, optimized)
             
             if idx != None: 
                 result.list.append(self.list[idx])
@@ -842,7 +792,7 @@ class DataGrid():
             
         # Busca por intervalo
         elif column == "creation_date" or column == "count":
-            idx_list = self.__interval_search(column, value)
+            idx_list = self.__interval_search(column, value, optimized)
             
             for i in idx_list:
                 result.list.append(self.list[i])
