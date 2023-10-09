@@ -5,7 +5,7 @@ sys.setrecursionlimit(10**6)
 # Dicionário global para armazenar os tempos de execução das funções decoradas
 _execution_times = {}
 
-def timeit(func, dict_list=False):
+def timeit(func):
     """Decorador para medir o tempo de execução de uma função.
 
     Args:
@@ -35,7 +35,14 @@ def timeit(func, dict_list=False):
         duration = (end_time - start_time)
         # duration = (end_time - start_time)
 
-        _execution_times[func.__name__] = duration
+        # Checa se a função decorada já foi executada antes
+        if func.__name__ not in _execution_times:
+            # Se não, cria uma lista, onde o primeiro elemento é o tempo de execução mensurado
+            _execution_times[func.__name__] = [duration]
+        else:
+            # Se sim, adiciona o tempo de execução mensurado à lista
+            _execution_times[func.__name__].append(duration)
+
         return result
 
     return wrapper
@@ -50,9 +57,17 @@ def get_execution_time(func_name, print_result=False):
         float: O tempo de execução da função decorada.
     """
 
-    result = _execution_times.get(func_name, 0)
+    time_list = _execution_times.get(func_name, 0)
+
+    # Como o tempo de execução é uma lista, retorna a média dos tempos
+    result = sum(time_list) / len(time_list)
 
     if print_result:
         print(f'Tempo de execução da função {func_name}: {result} ns')
 
     return result
+
+def reset_execution_times():
+    """Reseta o dicionário global de tempos de execução.
+    """
+    _execution_times.clear()
