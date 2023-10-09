@@ -60,7 +60,12 @@ def get_execution_time(func_name, print_result=False):
     time_list = _execution_times.get(func_name, 0)
 
     # Como o tempo de execução é uma lista, retorna a média dos tempos
-    result = sum(time_list) / len(time_list)
+    if isinstance(time_list, int):
+        result = time_list
+    elif isinstance(time_list, list):
+        result = sum(time_list) / len(time_list)
+    else:
+        return None
 
     if print_result:
         print(f'Tempo de execução da função {func_name}: {result} ns')
