@@ -953,6 +953,41 @@ class DataGrid():
     # TODO: implementar o MOM de acordo com a função sort (a partir do momento q ela reconhecer o melhor algoritmo para cada ordenação)
 
     @timeit
+    def __partition(self, datagrid, l, r, pivot_index=None):
+        """Particiona a lista de eventos, reordenando os eventos menores que o pivô, o pivô, e os eventos maiores que o pivô.
+        
+        Args:
+            datagrid (DataGrid): DataGrid a ser particionado
+            l (int): índice inicial do intervalo
+            r (int): índice final do intervalo
+            return_partition (str, optional): qual partição retornar, "Left" para a partição com elementos menores que o pivô, "Right" para a partição com elementos maiores que o pivô. Defaults to "Left".
+        
+        Returns:
+            DataGrid: DataGrid com a partição selecionada
+        """
+        
+        # Escolhe o pivô (por padrão, o último elemento)
+        if pivot_index == None:
+            pivot_index = r
+
+        pivot = datagrid.list[pivot_index]
+
+        # Particiona o vetor
+        i = l
+        j = r
+        while i < j:
+            while datagrid.list[i].count <= pivot.count and i < r:
+                i += 1
+            while datagrid.list[j].count > pivot.count and j > l:
+                j -= 1
+            if i < j:
+                datagrid.swap_row(i, j)
+        datagrid.swap_row(l, j)
+
+        # Retorna o índice do pivô
+        return j
+
+    @timeit
     def __quick_select(self, datagrid, l, r, k):
         """Encontra o k-ésimo menor elemento do DataGrid através do algoritmo de Quick Select
         
@@ -967,18 +1002,8 @@ class DataGrid():
         if l == r:
             return datagrid.list[l]
         
-        # Particiona o vetor
-        pivot = datagrid.list[l]
-        i = l
-        j = r
-        while i < j:
-            while datagrid.list[i].count <= pivot.count and i < r:
-                i += 1
-            while datagrid.list[j].count > pivot.count and j > l:
-                j -= 1
-            if i < j:
-                datagrid.swap_row(i, j)
-        datagrid.swap_row(l, j)
+        # Particiona o vetor e retorna o índice do pivô
+        j = self.__partition(datagrid, l, r)
 
         # Verifica se o elemento procurado é o pivô
         if k == j:
@@ -993,7 +1018,7 @@ class DataGrid():
             return self.__quick_select(datagrid, j+1, r, k)
         
     @timeit
-    def select_count(self, i, j):
+    def select_count(self, i, j, strategy="quickselect"):
         """Seleciona um intervalo de entradas do DataGrid com base na coluna count ordenada de forma crescente.
 
         Args:
@@ -1019,11 +1044,30 @@ class DataGrid():
             datagrid_copy = self.copy()
 
             # Encontra o i-ésimo e o j-ésimo menor elemento
-            i_min = self.__quick_select(datagrid_copy, 0, len(datagrid_copy.list)-1, i)
-            j_min = self.__quick_select(datagrid_copy, 0, len(datagrid_copy.list)-1, j)
+            i_min = datagrid_copy.__quick_select(datagrid_copy, 0, len(datagrid_copy.list)-1, i)
+            # Particiona o vetor novamente (garante que todos os elementos menores que o i-ésimo estejam à esquerda dele)
+            ith_item = datagrid_copy.__partition(datagrid_copy, 0, len(datagrid_copy.list)-1, datagrid_copy.list.index(i_min))
+            # Remove da lista todos os elementos menores que o i-ésimo e atualiza o tamanho do datagrid
+            datagrid_copy.list = datagrid_copy.list[ith_item+1:]
+            datagrid_copy.size = len(datagrid_copy.list)
 
-            # Encontra o intervalo entre os dois elementos
-            datagrid_copy.list = datagrid_copy.list[datagrid_copy.list.index(i_min):datagrid_copy.list.index(j_min)+1]
+            # Executa o quickselect novamente para encontrar o j-ésimo menor elemento
+            j_min = datagrid_copy.__quick_select(datagrid_copy, 0, datagrid_copy.size-1, j)
+            # Particiona o vetor novamente (garante que todos os elementos maiores que o j-ésimo estejam à direita dele)
+            jth_item = datagrid_copy.__partition(datagrid_copy, 0, datagrid_copy.size-1, datagrid_copy.list.index(j_min))
+            # Remove da lista todos os elementos maiores que o j-ésimo e atualiza o tamanho do datagrid
+            datagrid_copy.list = datagrid_copy.list[:jth_item+1]
+            datagrid_copy.size = len(datagrid_copy.list)
+
+            # Ordena o datagrid resultante de acordo com a coluna count
+            datagrid_copy.sort("count", "asc")
+
+            # Caso o datagrid final tenha mais do que o número esperado de elementos (j-i+1), remove os últimos elementos
+            if datagrid_copy.size > j-i+1:
+                datagrid_copy.list = datagrid_copy.list[:j-i+1]
+                datagrid_copy.size = len(datagrid_copy.list)
+
+            print("Tamanho final do datagrid (após revisão): ", datagrid_copy.size)
 
             # Retorna o datagrid apenas com o intervalo entre os dois elementos
             return datagrid_copy
@@ -1128,32 +1172,33 @@ if __name__ == "__main__":
     # Carregando dados a partir de um CSV
     datagrid_csv = DataGrid()
     datagrid_csv.read_csv("data/dados_gerados.csv", ";")
-    datagrid_csv.show()
+    # datagrid_csv.show()
 
-    print("select_count(2, 5) para um vetor não ordenado")
+    print("select_count(14, 34) para um vetor não ordenado")
     print(f"Ordenação: {datagrid_csv.ordered_by}")
-    # datagrid_csv.select_count(2, 5).show()
-    datagrid_csv.select_count(2, 5)
+    selected_datagrid = datagrid_csv.select_count(14, 34)
+    # selected_datagrid.show()
+    print(selected_datagrid.size)
     
     get_execution_time("select_count", True)
 
-    print("select_count(2, 5) para um vetor ordenado (asc)")
-    datagrid_csv.insertion_sort("Count")
+    print("select_count(14, 34) para um vetor ordenado (asc)")
+    datagrid_csv.insertion_sort("count")
     print(f"Ordenação: {datagrid_csv.ordered_by} ({datagrid_csv.direction})")
-    # datagrid_csv.select_count(2, 5).show()
-    datagrid_csv.select_count(2, 5)
+    selected_datagrid = datagrid_csv.select_count(14, 34)
+    # selected_datagrid.show()
+    print(selected_datagrid.size)
     
     get_execution_time("select_count", True)
 
-    print("select_count(2, 5) para um vetor ordenado (desc)")
-    datagrid_csv.insertion_sort("Count", "desc")
+    print("select_count(14, 34) para um vetor ordenado (desc)")
+    datagrid_csv.insertion_sort("count", "desc")
     print(f"Ordenação: {datagrid_csv.ordered_by} ({datagrid_csv.direction})")
-    # datagrid_csv.select_count(2, 5).show()
-    datagrid_csv.select_count(2, 5)
+    selected_datagrid = datagrid_csv.select_count(14, 34)
+    # selected_datagrid.show()
+    print(selected_datagrid.size)
     
     get_execution_time("select_count", True)
-
-    # TODO: implementar o decorador @timeit para as demais funções após discutir os métodos que receberão o decorador
 
     print("Teste merge_sort por ID")
     datagrid_csv.merge_sort("id")
