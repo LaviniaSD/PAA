@@ -396,12 +396,8 @@ class DataGrid():
         if column == "owner_id" or column == "creation_date" or column == "name" or column  == "content":
             raise InvalidColumnError(column=column)
         # Define método de comparação segundo tipo da coluna e direção
-        if direction == "asc":
-            if column == "id" or column == "count" or column == "timestamp": compare = lambda x, y: x < y
-            else: compare = lambda x, y: string_lesser(x, y, len(x), len(y))
-        else:
-            if column == "id" or column == "count" or column == "timestamp": compare = lambda x, y: x >= y
-            else: compare = lambda x, y: not string_lesser(x, y, len(x), len(y))
+        if direction == "asc": compare = lambda x, y: x < y
+        else: compare = lambda x, y: x >= y
         
         # Define as divisões das sublistas
         if end == None: end = self.size - 1
