@@ -98,9 +98,9 @@ def criar_arquivo_csv(nome_arquivo, dados, separador=','):
     dados.to_csv(nome_arquivo, sep=separador, index=False)
 
 # Exemplo de uso da função para criar um arquivo CSV com um ponto e vírgula como separador
-nome_arquivo = '../data/dados_gerados_big.csv'
+nome_arquivo = './data/dados_gerados_big.csv'
 num_linhas = 10000
-separador = ';'
+separador = ','
 
 dados = gerar_dados(num_linhas)
 criar_arquivo_csv(nome_arquivo, dados, separador)
