@@ -1,8 +1,10 @@
+import sys
+
 from datetime import datetime
 
+from exceptions import InvalidColumnError
 from timer import timeit, get_execution_time
 
-import sys
 sys.setrecursionlimit(10**6) 
 
 def enumerated_alpha_numeric(char):
@@ -203,17 +205,44 @@ class DataGrid():
         self.ordered_by = None 
     
     @timeit
+    def sort(self, column="id", direction="asc", strategy="quick_sort", optimized = False):
+        """
+        Ordena o DataGrid usando o algoritmo de ordenação especificado.
+
+        Args:
+            column (str, optional): O nome da coluna pela qual o DataGrid será ordenado. Caso nenhuma coluna seja definida, ordena pela "id" (padrão)
+            direction (str, optional): A direção da ordenação, "asc" para ascendente (padrão) ou "desc" para descendente.
+            strategy (str, optional): O algoritmo de ordenação a ser utilizado, "quick_sort"(padrão), "insertion_sort", "selection_sort", "merge_sort", "heap_sort" ou "radix_sort".
+        """
+
+        if strategy == "insertion_sort":
+            self.insertion_sort(column, direction, optimized = optimized)
+        elif strategy == "selection_sort":
+            self.selection_sort(column, direction, optimized = optimized)
+        elif strategy == "merge_sort":
+             self.merge_sort(column, direction, start = 0, end = None)
+        elif strategy == "quick_sort":
+            self.quick_sort(column, direction)
+        elif strategy == "heap_sort":
+            self.heap_sort(column, direction)
+        elif strategy == "radix_sort":
+            self.radix_sort(column, direction)
+        else:
+            print("Algoritmo de ordenação inválido")
+
+    @timeit
     def insertion_sort(self, column="id", direction="asc", optimized = False):
         """
         Ordena um datagrid usando o algoritmo de ordenação por inserção.
-
+            
+        Na otimização do insertion sort fazemos a verificação da ordenação na coluna, caso esteja ordenado não é executado o algoritmo.
         Args:
             column (str, optional): O nome da coluna pela qual o datagrid será ordenado, "id" para ordenar na coluna ID.
             direction (str, optional): A direção da ordenação, "asc" para ascendente (padrão) ou "desc" para descendente.
             optimized (bool): Define a estratégia adotada pelo algoritmo, False (padrão).
         """
         if column == "owner_id" or column == "creation_date" or column == "name" or column  == "content":
-            raise TypeError
+            raise InvalidColumnError(column=column)
         if optimized:
             if self.ordered_by == column and self.direction == direction:
                 return
@@ -251,34 +280,54 @@ class DataGrid():
         self.ordered_by = column    
 
     @timeit
-    def selection_sort(self, column="id", direction="asc"):
+    def selection_sort(self, column="id", direction="asc", optimized = False):
         """
         Ordena o DataGrid usando o algoritmo de ordenação por seleção.
 
+        Na otimização do selection sort acrescentamos um index a mais o max index, assim ele faz a troca do menor elemento e do maior elemento para sua posições corretas.
         Args:
             column (str, optional): O nome da coluna pela qual o DataGrid será ordenado, "id" para ordenar na coluna ID.
             direction (str, optional): A direção da ordenação, "asc" para ascendente (padrão) ou "desc" para descendente.
+            optimized (bool, optional): (bool): Define a estratégia adotada pelo algoritmo, False (padrão). 
         """
         if column == "owner_id" or column == "creation_date" or column == "name" or column  == "content":
-            raise TypeError
+            raise InvalidColumnError(column=column)
         # Tamanho da entrada
         n = self.size
         # Iniciando loope externo
         for i in range(n-1):
-            inx = i
+            min_inx = i
+            if optimized:
+                cont = 1
+                max_inx = i
             # Iniciando loop interno
             for j in range(i+1,n):
                 if direction == "asc":
-                    if getattr(self.list[j], column) < getattr(self.list[inx], column):
-                        inx = j
+                    if getattr(self.list[j], column) < getattr(self.list[min_inx], column):
+                        min_inx = j
+                    elif optimized and getattr(self.list[j], column) > getattr(self.list[max_inx], column):
+                        max_inx = j
                 if direction == "desc":
-                    if getattr(self.list[j], column) > getattr(self.list[inx], column):
-                        inx = j
-            self.swap_row(i, inx) 
+                    if getattr(self.list[j], column) > getattr(self.list[min_inx], column):
+                        min_inx = j
+                    elif optimized and getattr(self.list[j], column) < getattr(self.list[min_inx], column):
+                        max_inx = j
+            # Realizar troca se necessário
+            if i != min_inx:
+                self.swap_row(i, min_inx) 
+            if optimized:
+                if i == max_inx:
+                    max_inx = min_inx
+                if i != max_inx: 
+                    self.swap_row(j,max_inx)
+                cont += 1
+                n = n - 1
+                if cont == self.size//2:
+                    return
 
         self.direction = direction
         self.ordered_by = column
-    
+      
     @timeit
     def quick_sort(self, column="id", direction="asc"):
         """
@@ -289,7 +338,7 @@ class DataGrid():
             direction (str, optional): A direção da ordenação, "asc" para ascendente (padrão) ou "desc" para descendente.
         """
         if column == "owner_id" or column == "creation_date" or column == "name" or column  == "content":
-            raise TypeError
+            raise InvalidColumnError(column=column)
 
         # Tamanho da entrada
         def partition(low, high):
@@ -345,7 +394,7 @@ class DataGrid():
             end (_type_, optional): Parâmetro para recursão. Índice de fim da sublista a ser ordenada. Defaults to None.
         """
         if column == "owner_id" or column == "creation_date" or column == "name" or column  == "content":
-            raise TypeError
+            raise InvalidColumnError(column=column)
         # Define método de comparação segundo tipo da coluna e direção
         if direction == "asc":
             if column == "id" or column == "count" or column == "timestamp": compare = lambda x, y: x < y
@@ -402,7 +451,7 @@ class DataGrid():
             column (str): O nome da coluna usada como critério para a ordenação.
         """
         if column == "owner_id" or column == "creation_date" or column == "name" or column  == "content":
-            raise TypeError
+            raise InvalidColumnError(column=column)
         inx = i
         left_inx = (i*2) + 1
         right_inx = (i*2) + 2
@@ -462,7 +511,7 @@ class DataGrid():
                 self.heapfy_min(n, i, column)
     
     @timeit
-    def heap_sort(self, n, column = "id", direction="asc"):
+    def heap_sort(self, column = "id", direction="asc"):
         """
         Ordena um DataGrid usando o algoritmo Heap Sort.
 
@@ -471,6 +520,7 @@ class DataGrid():
             column (str, optional): O nome da coluna usada como critério para a ordenação, "id" para ordenar na coluna ID..
             direction (str, optional): A direção da ordenação, "asc" para ascendente (padrão) ou "desc" para descendente.
         """
+        n = self.size
         if direction == "asc":
             # Construindo heap
             self.build_heap(n, column, "max")
@@ -488,7 +538,7 @@ class DataGrid():
         self.direction = direction
 
     @timeit
-    def radix_sort(self, pos, column, lim = 20, type_code="ASCII", start=0, end=-1, direction="asc", not_sort = True):
+    def radix_sort(self, column="owner_id", direction="asc", pos=0, lim = 20, type_code="ASCII", start=0, end=-1, not_sort = True):
         """
         Ordena o DataGrid usando o algoritmo de ordenação Radix Sort.
 
@@ -500,10 +550,10 @@ class DataGrid():
             start (int, optional): O índice inicial para a ordenação (padrão é 0).
             end (int, optional): O índice final para a ordenação (padrão é -1, indicando o final da lista).
             direction (str, optional): A direção da ordenação, "asc" para ascendente (padrão) ou "desc" para descendente.
-            not_sort (bool): Boleano para lista ordenada ou não, (padrão) True, ou seja não está ordenada. 
+            not_sort (bool): Boleano para lista na coluna ordenada ou não, (padrão) True, ou seja não está ordenada. 
         """
         if column == "id" or column == "count" or column == "timestamp":
-            raise TypeError
+            raise InvalidColumnError(column=column)
         if column == "owner_id":
             type_code = "alphanumeric"
             if pos == 0:    
@@ -593,14 +643,9 @@ class DataGrid():
             # Se tiver caracteres repetidos na posição
             if len(aux) != 0:
                 for k in range(len(aux)):
-                    self.radix_sort(pos+1, column, lim-1, type_code, aux_start[k], aux_start[k] + aux[k][1], direction, not_sort = not_sort)
+                    self.radix_sort(column, direction, pos+1, lim-1, type_code, aux_start[k], aux_start[k] + aux[k][1], not_sort = not_sort)
         self.ordered_by = column
         self.direction = direction
-
-    # TODO: sort precisa de um parâmetro que decide qual algoritmo usar
-    #def sort(self, column, direction="asc", strategy="pattern"):
-    #   if column == "ID" or column == "Count":
-    #        return self.__quick_sort(column, direction)
 
     @timeit
     def __exact_binary_search(self, column, value):
