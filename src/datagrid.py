@@ -558,7 +558,7 @@ class DataGrid():
             type_code = "date_type"
 
         # Verificando se o lim foi está de acordo
-        if  lim ==-1 or lim > 0:
+        if  lim <= -1 or lim > 0:
             # Num de char
             if type_code == "ASCII":
                 type_code_size = 128 
