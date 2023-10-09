@@ -1,5 +1,6 @@
-import time
 import sys
+import time
+
 sys.setrecursionlimit(10**6) 
 
 # Dicionário global para armazenar os tempos de execução das funções decoradas
@@ -26,10 +27,9 @@ def timeit(func):
             object: O resultado da função decorada.        
         """
         
-        
-        start_time = time.time_ns()     # Início da contagem de tempo
+        start_time = time.perf_counter_ns()     # Início da contagem de tempo
         result = func(*args, **kwargs)  # Execução da função decorada
-        end_time = time.time_ns()       # Fim da contagem de tempo
+        end_time = time.perf_counter_ns()       # Fim da contagem de tempo
 
         # Calcula o tempo de execução da função decorada e armazena em um dicionário global
         duration = (end_time - start_time)
