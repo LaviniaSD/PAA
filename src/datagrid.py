@@ -203,17 +203,30 @@ class DataGrid():
         self.ordered_by = None 
     
     @timeit
-    def insertion_sort(self, column="id", direction="asc"):
+    def insertion_sort(self, column="id", direction="asc", optimized = False):
         """
         Ordena um datagrid usando o algoritmo de ordenação por inserção.
 
         Args:
             column (str, optional): O nome da coluna pela qual o datagrid será ordenado, "id" para ordenar na coluna ID.
             direction (str, optional): A direção da ordenação, "asc" para ascendente (padrão) ou "desc" para descendente.
+            optimized (bool): Define a estratégia adotada pelo algoritmo, False (padrão).
         """
         if column == "owner_id" or column == "creation_date" or column == "name" or column  == "content":
             raise TypeError
-
+        if optimized:
+            if self.ordered_by == column and self.direction == direction:
+                return
+            for i in self.size:
+                if getattr(self.list[i],column) > getattr(self.list[i],column) and direction == "asc":
+                    pass 
+                elif getattr(self.list[i],column) < getattr(self.list[i],column) and direction == "desc":
+                    pass 
+                else:
+                    self.ordered_by == column 
+                    self.direction == direction
+            if self.ordered_by == column and self.direction == direction:
+                return
         # Tamanho da entrada
         n = self.size        
         # Ordenanado em ordem crescente
@@ -236,7 +249,7 @@ class DataGrid():
 
         self.direction = direction
         self.ordered_by = column    
-    
+
     @timeit
     def selection_sort(self, column="id", direction="asc"):
         """
@@ -275,7 +288,10 @@ class DataGrid():
             column (str, optional): O nome da coluna pela qual o DataGrid será ordenado, "id" para ordenar na coluna ID.
             direction (str, optional): A direção da ordenação, "asc" para ascendente (padrão) ou "desc" para descendente.
         """
+        if column == "owner_id" or column == "creation_date" or column == "name" or column  == "content":
+            raise TypeError
 
+        # Tamanho da entrada
         def partition(low, high):
             """
             Particiona o DataGrid em duas partes, uma com valores menores que o pivô e outra com valores maiores que o pivô.
@@ -490,8 +506,15 @@ class DataGrid():
             raise TypeError
         if column == "owner_id":
             type_code = "alphanumeric"
+            if pos == 0:    
+                lim = 5
         if column == "creation_date":
             type_code = "date_type"
+            if pos == 0:
+                lim = 19
+        if column == "name":
+            if pos == 0:
+                lim = 20
         # Verificando se a lista está ou não ordenada
         if not_sort or lim > 0:
             not_sort = False
@@ -1011,12 +1034,12 @@ if __name__ == "__main__":
     datagrid.show()
 
     print("Ordenando DataGrid pela coluna ID com Insertion Sort")
-    datagrid.insertion_sort("ID")
+    datagrid.insertion_sort("id")
 
     datagrid.show()
 
     print("Ordenando de forma decrescente DataGrid pela coluna ID com Selection Sort")
-    datagrid.selection_sort("ID", "desc")
+    datagrid.selection_sort("id", "desc")
 
     datagrid.show()
     
