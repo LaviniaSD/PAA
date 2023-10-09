@@ -15,7 +15,7 @@ def enumerated_alpha_numeric(char):
         "U": 30, "V": 31, "W": 32, "X": 33, "Y": 34, "Z": 35,
         "a": 36, "b": 37, "c": 38, "d": 39, "e": 40, "f": 41, "g": 42, "h": 43, "i": 44, "j": 45,
         "k": 46, "l": 47, "m": 48, "n": 49, "o": 50, "p": 51, "q": 52, "r": 53, "s": 54, "t": 55,
-        "u": 56, "v": 57, "w": 58, "x": 59, "y": 60, "z": 61
+        "u": 56, "v": 57, "w": 58, "x": 59, "y": 60, "z": 61, " ": 62
     }   
     return alpha_numeric[char]
 def enumerated_date(char):
@@ -534,7 +534,7 @@ class DataGrid():
         self.direction = direction
 
     @timeit
-    def radix_sort(self, column="owner_id", direction="asc", pos=0, lim = 20, type_code="ASCII", start=0, end=-1, not_sort = True):
+    def radix_sort(self, column="owner_id", direction="asc", pos=0, type_code="ASCII", start=0, end=-1):
         """
         Ordena o DataGrid usando o algoritmo de ordenação Radix Sort.
 
@@ -551,95 +551,92 @@ class DataGrid():
         if column == "id" or column == "count" or column == "timestamp":
             raise InvalidColumnError(column=column)
         if column == "owner_id":
-            type_code = "alphanumeric"
-            if pos == 0:    
-                lim = 5
+            type_code = "alphanumeric"  
         if column == "creation_date":
             type_code = "date_type"
-            if pos == 0:
-                lim = 19
-        if column == "name":
-            if pos == 0:
-                lim = 20
-        # Verificando se a lista está ou não ordenada
-        if not_sort or lim > 0:
-            not_sort = False
-            if type_code == "ASCII":
-                type_code_size = 128 
-            elif type_code == "alphanumeric":
-                type_code_size = 62
-            elif type_code == "date_type":
-                type_code_size = 13
-            # Se não for dado o fim do datagrid, fazer o fim a última linha
-            if end == -1:
-                end = self.size
-            # Número de caracteres no padrão type_code, fs inicialmente guarda a frequência de elementos
-            # o elemento de valor n, é informado sua frequência na n+1-ésima entrada da lista fs
-            fs = [0] * (type_code_size + 1)
-            # Lista temporaria para inserir os valores ordenados
-            temp = [0] * (self.size)
-            for i in range(start, end):
-                # Caso uma palavra conter menos letras que outras
-                try:
-                    getattr(self.list[i], column)[pos]
-                except IndexError:
-                    palavra_atual = getattr(self.list[i], column)
-                    # Adiciona um espaço ao final da palavra se necessário
-                    if len(palavra_atual) < pos + 1:
-                        setattr(self.list[i], column, palavra_atual + " ")
-                # Guardando caractere com seu valor ASCII
-                if direction == "asc" and type_code == "ASCII": 
-                    fs[ord(getattr(self.list[i], column)[pos]) + 1] += 1
-                elif direction == "asc" and type_code == "alphanumeric": 
-                    fs[enumerated_alpha_numeric(getattr(self.list[i], column)[pos]) + 1] += 1
-                elif direction == "asc" and type_code == "date_type": 
-                    fs[enumerated_date(getattr(self.list[i], column)[pos]) + 1] += 1
-                elif direction == "desc" and type_code == "ASCII":
-                    fs[type_code_size - 1 - ord(getattr(self.list[i], column)[pos]) + 1] += 1
-                elif direction == "desc" and type_code == "alphanumeric": 
-                    fs[type_code_size - 1 - enumerated_alpha_numeric(getattr(self.list[i], column)[pos]) + 1] += 1
-                elif direction == "desc" and type_code == "date_type": 
-                    fs[type_code_size - 1 - enumerated_date(getattr(self.list[i], column)[pos]) + 1] += 1
-            # Guardando a entrada que o número repetiu e quantas vezes ele repetiu
-            aux = []
-            for j in range(1,type_code_size + 1):
-              # Se o caractere se repete
-                if fs[j]>1:
-                    aux.append([j-1, fs[j]])
-            # Calculando onde cada elemento da lista começa e o espaço para guardar cada caractere 
-            for j in range(1,type_code_size + 1):
-                fs[j]+=fs[j-1]
-            # Inicio da realocação de elementos
-            for i in range(start,end):
-                if i == start:
-                # Inicio da recursão, onde o elemento que contém mais de uma repetição começa
-                    aux_start=[]
-                    for k in aux:
-                        aux_start.append(fs[k[0]] + start)
-                # Realocando elemento j
-                if direction == "asc" and type_code == "ASCII": 
-                    j = ord(getattr(self.list[i], column)[pos])
-                elif direction == "asc" and type_code == "alphanumeric": 
-                    j = enumerated_alpha_numeric(getattr(self.list[i], column)[pos])
-                elif direction == "asc" and type_code == "date_type": 
-                    j = enumerated_date(getattr(self.list[i], column)[pos])
-                elif direction == "desc" and type_code == "ASCII": 
-                    j = type_code_size  -1 - ord(getattr(self.list[i], column)[pos])
-                elif direction == "desc" and type_code == "alphanumeric": 
-                    j = type_code_size -1 - enumerated_alpha_numeric(getattr(self.list[i], column)[pos])
-                elif direction == "desc" and type_code == "date_type": 
-                    j = type_code_size -1 - enumerated_date(getattr(self.list[i], column)[pos])
-                temp[fs[j] + start] = self.list[i]
-                fs[j] += 1
-            for i in range(start,end):
-                if self.list[i] != temp[i]:
-                    # Realocando na lista original
-                    self.list[i] = temp[i]
-                    not_sort = True
-            # Se tiver caracteres repetidos na posição
-            if len(aux) != 0:
-                for k in range(len(aux)):
-                    self.radix_sort(column, direction, pos+1, lim-1, type_code, aux_start[k], aux_start[k] + aux[k][1], not_sort = not_sort)
+
+
+        if type_code == "ASCII":
+            type_code_size = 128 
+        elif type_code == "alphanumeric":
+            type_code_size = 63
+        elif type_code == "date_type":
+            type_code_size = 13
+        # Se não for dado o fim do datagrid, fazer o fim a última linha
+        if end == -1:
+            end = self.size
+        # Número de caracteres no padrão type_code, fs inicialmente guarda a frequência de elementos
+        # o elemento de valor n, é informado sua frequência na n+1-ésima entrada da lista fs
+        fs = [0] * (type_code_size + 1)
+        # Lista temporaria para inserir os valores ordenados
+        temp = [0] * (self.size)
+        n = end-start # Palavras no slice
+        cont = 0 # Num de palavras que foram acrescentados " "
+        for i in range(start, end):
+            # Caso uma palavra conter menos letras que outras
+            try:
+                getattr(self.list[i], column)[pos]
+            except IndexError:
+                palavra_atual = getattr(self.list[i], column)
+                # Adiciona um espaço ao final da palavra se necessário
+                if len(palavra_atual) < pos + 1:
+                    setattr(self.list[i], column, palavra_atual + " ")
+                    cont += 1
+            if cont == n: #Parando de fazer comparações, todos os elementos já estão ordenados
+                return
+            # Guardando caractere com seu valor ASCII, a frequência em que ele aparece na pos
+            if direction == "asc" and type_code == "ASCII": 
+                fs[ord(getattr(self.list[i], column)[pos]) + 1] += 1
+            elif direction == "asc" and type_code == "alphanumeric": 
+                fs[enumerated_alpha_numeric(getattr(self.list[i], column)[pos]) + 1] += 1
+            elif direction == "asc" and type_code == "date_type": 
+                fs[enumerated_date(getattr(self.list[i], column)[pos]) + 1] += 1
+            elif direction == "desc" and type_code == "ASCII":
+                fs[type_code_size - 1 - ord(getattr(self.list[i], column)[pos]) + 1] += 1
+            elif direction == "desc" and type_code == "alphanumeric": 
+                fs[type_code_size - 1 - enumerated_alpha_numeric(getattr(self.list[i], column)[pos]) + 1] += 1
+            elif direction == "desc" and type_code == "date_type": 
+                fs[type_code_size - 1 - enumerated_date(getattr(self.list[i], column)[pos]) + 1] += 1
+        # Guardando a entrada que o número repetiu e quantas vezes ele repetiu
+        aux = []
+        # Entrada 1 do vetor fs e última entrada do vetor fs, guarda apenas aqueles que se repete mais de uma vez
+        for j in range(1,type_code_size + 1):
+          # Se o caractere se repete
+            if fs[j]>1:
+                aux.append([j-1, fs[j]])
+        # Calculando onde cada elemento da lista começa e o espaço para guardar cada caractere 
+        for j in range(1,type_code_size + 1):
+            fs[j]+=fs[j-1]
+        # Inicio da realocação de elementos, É AQUI QUE NÃO MUDAMOS OS ELEMENTOS JÁ MUDADOS ANTERIORMENTE!!!
+        for i in range(start,end):#por causa do start e end!!!!
+            if i == start:
+            # Inicio da iteração, onde o elemento que contém mais de uma repetição começa
+                aux_start=[]
+                for k in aux:
+                    aux_start.append(fs[k[0]] + start)
+            # Realocando elemento j
+            if direction == "asc" and type_code == "ASCII": 
+                j = ord(getattr(self.list[i], column)[pos])
+            elif direction == "asc" and type_code == "alphanumeric": 
+                j = enumerated_alpha_numeric(getattr(self.list[i], column)[pos])
+            elif direction == "asc" and type_code == "date_type": 
+                j = enumerated_date(getattr(self.list[i], column)[pos])
+            elif direction == "desc" and type_code == "ASCII": 
+                j = type_code_size  -1 - ord(getattr(self.list[i], column)[pos])
+            elif direction == "desc" and type_code == "alphanumeric": 
+                j = type_code_size -1 - enumerated_alpha_numeric(getattr(self.list[i], column)[pos])
+            elif direction == "desc" and type_code == "date_type": 
+                j = type_code_size -1 - enumerated_date(getattr(self.list[i], column)[pos])
+            temp[fs[j] + start] = self.list[i]
+            fs[j] += 1 # Realocando onde o próximo valor j vai entrar na lista
+        for i in range(start,end):
+            if self.list[i] != temp[i]:
+                # Realocando na lista original
+                self.list[i] = temp[i]
+        # Se tiver caracteres repetidos na posição
+        if len(aux) != 0:
+            for k in range(len(aux)):
+                self.radix_sort(column, direction, pos+1, type_code, aux_start[k], aux_start[k] + aux[k][1])
         self.ordered_by = column
         self.direction = direction
 
