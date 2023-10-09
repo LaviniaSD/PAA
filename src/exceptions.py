@@ -17,5 +17,3 @@ class InvalidColumnError(Exception):
         self.message = message
         self.column = column
         super().__init__(self.message)
-
-raise InvalidColumnError("A coluna informada não é suportada pela função", column="id")
