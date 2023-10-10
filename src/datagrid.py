@@ -728,7 +728,7 @@ class DataGrid():
         # Se procurar por data, usa timestamp ao invés da string
         if column == "creation_date": 
             column = "timestamp"
-            value[0], value[1] = date_to_timestamp(value[0]), date_to_timestamp(value[1]) 
+            value = date_to_timestamp(value[0]), date_to_timestamp(value[1]) 
         start = 0
         end = self.size - 1
         mid = int(end/2)
@@ -841,7 +841,7 @@ class DataGrid():
         # Se procurar por data, usa timestamp ao invés da string
         if column == "creation_date": 
             column = "timestamp"
-            value = (date_to_timestamp(value[0]), date_to_timestamp(value[1])) 
+            value = date_to_timestamp(value[0]), date_to_timestamp(value[1])
         
         start, end = value        
         result = []
