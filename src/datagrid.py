@@ -953,7 +953,7 @@ class DataGrid():
     # TODO: implementar o MOM de acordo com a função sort (a partir do momento q ela reconhecer o melhor algoritmo para cada ordenação)
 
     @timeit
-    def __partition(self, datagrid, l, r, pivot_index=None):
+    def __partition(self, datagrid, l, r, pivot=None):
         """Particiona a lista de eventos, reordenando os eventos menores que o pivô, o pivô, e os eventos maiores que o pivô.
         
         Args:
@@ -967,10 +967,10 @@ class DataGrid():
         """
         
         # Escolhe o pivô (por padrão, o último elemento)
-        if pivot_index == None:
-            pivot_index = r
+        if pivot == None:
+            pivot = datagrid.list[r]
 
-        pivot = datagrid.list[pivot_index]
+        # pivot = self.__median_of_medians(datagrid.list[l:r+1])
 
         # Particiona o vetor
         i = l
@@ -1025,9 +1025,9 @@ class DataGrid():
             i (int): índice inicial do intervalo
             j (int): índice final do intervalo
         """
-
+        
         # Caso o datagrid esteja ordenado, basta retornar o intervalo entre a i-ésima e a j-ésima entrada
-        if self.ordered_by == "Count":
+        if self.ordered_by == "count":
 
             datagrid_selected = DataGrid()
 
@@ -1035,6 +1035,8 @@ class DataGrid():
                 datagrid_selected.list = self.list[i:j+1]
             else:
                 datagrid_selected.list = self.list[self.size-(i)-1 : self.size-(j+1)-1 : -1]
+
+            datagrid_selected.size = len(datagrid_selected.list)
 
             return datagrid_selected
         
@@ -1046,7 +1048,7 @@ class DataGrid():
             # Encontra o i-ésimo e o j-ésimo menor elemento
             i_min = datagrid_copy.__quick_select(datagrid_copy, 0, len(datagrid_copy.list)-1, i)
             # Particiona o vetor novamente (garante que todos os elementos menores que o i-ésimo estejam à esquerda dele)
-            ith_item = datagrid_copy.__partition(datagrid_copy, 0, len(datagrid_copy.list)-1, datagrid_copy.list.index(i_min))
+            ith_item = datagrid_copy.__partition(datagrid_copy, 0, len(datagrid_copy.list)-1, i_min)
             # Remove da lista todos os elementos menores que o i-ésimo e atualiza o tamanho do datagrid
             datagrid_copy.list = datagrid_copy.list[ith_item+1:]
             datagrid_copy.size = len(datagrid_copy.list)
@@ -1054,7 +1056,7 @@ class DataGrid():
             # Executa o quickselect novamente para encontrar o j-ésimo menor elemento
             j_min = datagrid_copy.__quick_select(datagrid_copy, 0, datagrid_copy.size-1, j)
             # Particiona o vetor novamente (garante que todos os elementos maiores que o j-ésimo estejam à direita dele)
-            jth_item = datagrid_copy.__partition(datagrid_copy, 0, datagrid_copy.size-1, datagrid_copy.list.index(j_min))
+            jth_item = datagrid_copy.__partition(datagrid_copy, 0, datagrid_copy.size-1, j_min)
             # Remove da lista todos os elementos maiores que o j-ésimo e atualiza o tamanho do datagrid
             datagrid_copy.list = datagrid_copy.list[:jth_item+1]
             datagrid_copy.size = len(datagrid_copy.list)
@@ -1174,27 +1176,27 @@ if __name__ == "__main__":
     datagrid_csv.read_csv("data/dados_gerados.csv", ";")
     # datagrid_csv.show()
 
-    print("select_count(14, 34) para um vetor não ordenado")
+    print("select_count(14, 340) para um vetor não ordenado")
     print(f"Ordenação: {datagrid_csv.ordered_by}")
-    selected_datagrid = datagrid_csv.select_count(14, 34)
+    selected_datagrid = datagrid_csv.select_count(14, 340)
     # selected_datagrid.show()
     print(selected_datagrid.size)
     
     get_execution_time("select_count", True)
 
-    print("select_count(14, 34) para um vetor ordenado (asc)")
+    print("select_count(14, 340) para um vetor ordenado (asc)")
     datagrid_csv.insertion_sort("count")
     print(f"Ordenação: {datagrid_csv.ordered_by} ({datagrid_csv.direction})")
-    selected_datagrid = datagrid_csv.select_count(14, 34)
+    selected_datagrid = datagrid_csv.select_count(14, 340)
     # selected_datagrid.show()
     print(selected_datagrid.size)
     
     get_execution_time("select_count", True)
 
-    print("select_count(14, 34) para um vetor ordenado (desc)")
+    print("select_count(14, 340) para um vetor ordenado (desc)")
     datagrid_csv.insertion_sort("count", "desc")
     print(f"Ordenação: {datagrid_csv.ordered_by} ({datagrid_csv.direction})")
-    selected_datagrid = datagrid_csv.select_count(14, 34)
+    selected_datagrid = datagrid_csv.select_count(14, 340)
     # selected_datagrid.show()
     print(selected_datagrid.size)
     
