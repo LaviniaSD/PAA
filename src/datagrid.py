@@ -226,7 +226,7 @@ class DataGrid():
         elif strategy == "heap_sort":
             self.heap_sort(column, direction)
         elif strategy == "radix_sort":
-            self.radix_sort(column, direction)
+            self.radix_sort(-1, column, direction)
         else:
             print("Algoritmo de ordenação inválido")
 
@@ -1266,15 +1266,5 @@ if __name__ == "__main__":
 
     print("Teste merge_sort por ID")
     datagrid_csv.merge_sort("id")
-    print("Ordenação:", datagrid_csv.ordered_by)
-    datagrid_csv.show()
-
-    print("Teste merge_sort por Owner ID")
-    datagrid_csv.merge_sort("owner_id")
-    print("Ordenação:", datagrid_csv.ordered_by)
-    datagrid_csv.show()
-
-    print("Teste merge_sort desc por creation_date")
-    datagrid_csv.merge_sort("creation_date", "desc")
     print("Ordenação:", datagrid_csv.ordered_by)
     datagrid_csv.show()
