@@ -216,9 +216,9 @@ class DataGrid():
         """
 
         if strategy == "insertion_sort":
-            self.insertion_sort(column, direction, optimized = optimized)
+            self.insertion_sort(column, direction, optimized)
         elif strategy == "selection_sort":
-            self.selection_sort(column, direction, optimized = optimized)
+            self.selection_sort(column, direction, optimized)
         elif strategy == "merge_sort":
              self.merge_sort(column, direction, start = 0, end = None)
         elif strategy == "quick_sort":
@@ -246,16 +246,17 @@ class DataGrid():
         if optimized:
             if self.ordered_by == column and self.direction == direction:
                 return
-            for i in self.size:
-                if getattr(self.list[i],column) > getattr(self.list[i],column) and direction == "asc":
-                    pass 
-                elif getattr(self.list[i],column) < getattr(self.list[i],column) and direction == "desc":
-                    pass 
-                else:
-                    self.ordered_by == column 
-                    self.direction == direction
+            ordenada = True
+            for i in range(self.size-1):
+                if getattr(self.list[i],column) > getattr(self.list[i+1],column) and direction == "asc":
+                    ordenada = False 
+                elif getattr(self.list[i],column) < getattr(self.list[i+1],column) and direction == "desc":
+                    ordenada = False                
+            if ordenada:
+                self.ordered_by == column 
+                self.direction == direction  
             if self.ordered_by == column and self.direction == direction:
-                return
+                return 
         # Tamanho da entrada
         n = self.size        
         # Ordenanado em ordem crescente
