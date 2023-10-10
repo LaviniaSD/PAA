@@ -18,6 +18,7 @@ def enumerated_alpha_numeric(char):
         "u": 56, "v": 57, "w": 58, "x": 59, "y": 60, "z": 61, " ": 62
     }   
     return alpha_numeric[char]
+
 def enumerated_date(char):
     date_type = {"0": 0, "1": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, "9": 9, " ": 0, ":": 0, "/": 0}
     return date_type[char]
@@ -680,7 +681,7 @@ class DataGrid():
         while start != end: 
             if getattr(self.list[mid], column) == value: return mid # Foi encontrado
         
-            if compare(getattr(self.list[mid], column), value): start = mid
+            if compare(getattr(self.list[mid], column), value): start = mid+1
             else: end = mid
 
             mid = int(start + (end - start)/2)
@@ -727,8 +728,7 @@ class DataGrid():
         # Se procurar por data, usa timestamp ao invés da string
         if column == "creation_date": 
             column = "timestamp"
-            value[0], value[1] = date_to_timestamp(value[0]), date_to_timestamp(value[1]) 
-        
+            value = date_to_timestamp(value[0]), date_to_timestamp(value[1]) 
         start = 0
         end = self.size - 1
         mid = int(end/2)
@@ -743,12 +743,12 @@ class DataGrid():
                     while getattr(self.list[mid-1], column) == value[0]: mid -= 1
                     break
                 
-                if cur_val < value[0]: start = mid
+                if cur_val < value[0]: start = mid+1
                 else: end = mid
-
+                
                 mid = int(start + (end - start)/2)
-
             if getattr(self.list[mid], column) < value[0]: mid += 1
+
             if getattr(self.list[mid], column) > value[1]: return [] # Caso em que o intervalo não existe
 
             # Nesse momento, mid é o índice do primeiro elemento do grid que pertence ao intervalo
@@ -767,7 +767,7 @@ class DataGrid():
                     while getattr(self.list[mid+1], column) == value[1]: mid += 1
                     break
                 
-                if cur_val < value[1]: start = mid
+                if cur_val < value[1]: start = mid+1
                 else: end = mid
 
                 mid = int(start + (end - start)/2)
@@ -788,7 +788,7 @@ class DataGrid():
                     break
                 
                 if cur_val < value[0]: end = mid
-                else: start = mid
+                else: start = mid+1
 
                 mid = int(start + (end - start)/2)
 
@@ -812,7 +812,7 @@ class DataGrid():
                     break
                 
                 if cur_val < value[1]: end = mid
-                else: start = mid
+                else: start = mid+1
 
                 mid = int(start + (end - start)/2)
 
@@ -841,7 +841,7 @@ class DataGrid():
         # Se procurar por data, usa timestamp ao invés da string
         if column == "creation_date": 
             column = "timestamp"
-            value = (date_to_timestamp(value[0]), date_to_timestamp(value[1])) 
+            value = date_to_timestamp(value[0]), date_to_timestamp(value[1])
         
         start, end = value        
         result = []
@@ -907,7 +907,7 @@ class DataGrid():
         Returns:
             DataGrid: Novo DataGrid contendo os Events que correspondem à busca. 
         """
-        result = DataGrid() 
+        result = DataGrid()
 
         # Busca exata
         if column == "id" or column == "owner_id":
