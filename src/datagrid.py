@@ -226,7 +226,7 @@ class DataGrid():
         elif strategy == "heap_sort":
             self.heap_sort(column, direction)
         elif strategy == "radix_sort":
-            self.radix_sort(column, direction)
+            self.radix_sort(-1, column, direction)
         else:
             print("Algoritmo de ordenação inválido")
 
