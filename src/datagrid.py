@@ -951,37 +951,7 @@ class DataGrid():
 
         return new_datagrid
     
-    # TODO: implementar o MOM de acordo com a função sort (a partir do momento q ela reconhecer o melhor algoritmo para cada ordenação)
-
-    def __median_of_medians(self, column="count"):
-        """Encontra o índice do elemento mediano do DataGrid através do algoritmo de Median of Medians
-        
-        Args:
-            column (str, optional): coluna a ser ordenada. Defaults to "count".
-
-        Returns:
-            int: índice do elemento mediano
-        """
-
-        # Caso o datagrid tenha tamanho <= 5, basta ordená-lo e retornar o índice do elemento mediano
-        if self.size <= 5:
-            self.quick_sort(column)
-            median_index = self.size // 2
-            return median_index
-        
-        # Caso contrário, particiona o datagrid em grupos de 5 elementos e encontra o elemento mediano de cada grupo
-        medians = DataGrid()
-        for i in range(0, self.size, 5):
-            group = DataGrid()
-            for j in range(0,5):
-                if i+j < self.size:
-                    group.insert_row(self.list[i+j])
-            group.quick_sort(column)
-            medians.insert_row(group.list[group.size//2])
-        # medians.show()
-        return medians.__median_of_medians(column)
-
-    def __median_of_medians_event_list(self, event_list):
+    def __median_of_medians(self, event_list):
         """Encontra o índice do elemento mediano de uma lista de eventos através do algoritmo de Median of Medians
         
         Args:
@@ -991,11 +961,28 @@ class DataGrid():
             int: índice do elemento mediano
         """
 
+        def __insertion_sort(event_list):
+            """Ordena uma lista de eventos através do algoritmo de Insertion Sort
+            
+            Args:
+                event_list (list): lista de eventos a ser ordenada
+            """
+            for i in range(1, len(event_list)):
+                key = event_list[i]
+                j = i-1
+                while j >= 0 and key.count < event_list[j].count:
+                    event_list[j+1] = event_list[j]
+                    j -= 1
+                event_list[j+1] = key
+
         # Caso o datagrid tenha tamanho <= 5, basta ordená-lo e retornar o índice do elemento mediano
         if len(event_list) <= 5:
-            event_list.sort(key=lambda x: x.count)
-            median_index = len(event_list) // 2
-            return median_index
+            
+            # Ordena a lista de eventos
+            __insertion_sort(event_list)
+
+            # Retorna o pivô como sendo o elemento mediano
+            return event_list[len(event_list)//2]
         
         # Caso contrário, particiona o datagrid em grupos de 5 elementos e encontra o elemento mediano de cada grupo
         medians = []
@@ -1004,18 +991,17 @@ class DataGrid():
             for j in range(0,5):
                 if i+j < len(event_list):
                     group.append(event_list[i+j])
-            group.sort(key=lambda x: x.count)
+            __insertion_sort(group)
             medians.append(group[len(group)//2])
-        return self.__median_of_medians_event_list(medians)
-    
+        return self.__median_of_medians(medians)
+
     @timeit
-    def __partition(self, datagrid, l, r, pivot=None, strategy="median_of_medians_event_list"):
-        """Particiona a lista de eventos, reordenando os eventos menores que o pivô, o pivô, e os eventos maiores que o pivô.
+    def __partition(self, low, high, pivot=None, strategy=None):
+        """Particiona a lista de eventos, agrupando os eventos menores que o pivô, o pivô, e os eventos maiores que o pivô.
         
         Args:
-            datagrid (DataGrid): DataGrid a ser analisado
-            l (int): índice inicial do intervalo
-            r (int): índice final do intervalo
+            low (int): índice inicial do intervalo
+            high (int): índice final do intervalo
             pivot (Event, optional): pivô da partição. Defaults to None.
             strategy (str, optional): estratégia de escolha do pivô. Defaults to None.
 
@@ -1024,61 +1010,65 @@ class DataGrid():
         """
 
         if not pivot:
+            # Escolhe o pivô como o elemento mediano da lista de eventos
+            if strategy == "quickselect_median_of_medians":
 
-            if strategy == "median_of_medians_datagrid":
-                pivot_index = self.__median_of_medians()
-            elif strategy == "median_of_medians_event_list":
-                pivot_index = self.__median_of_medians_event_list(datagrid.list)
+                # Caso a lista que seria passada tem pelo menos um elemento
+                list_mom = self.list[low:high+1]
+                if len(list_mom) > 0:
+                    pivot = self.__median_of_medians(self.list[low:high+1])
+                else:
+                    # Por padrão, escolhe o último elemento do intervalo como pivô
+                    pivot = self.list[high]
+
+                # pivot = self.list[high]
+
             else:
-                pivot_index = r
+                # Por padrão, escolhe o último elemento do intervalo como pivô
+                pivot = self.list[high]
 
-            pivot = datagrid.list[pivot_index]
+        # Computa as parcelas da lista menores, iguais ou maiores que o pivô
+        lower_than_pivot = [x for x in self.list[low:high+1] if x.count < pivot.count]
+        equal_to_pivot = [x for x in self.list[low:high+1] if x.count == pivot.count]
+        greater_than_pivot = [x for x in self.list[low:high+1] if x.count > pivot.count]
 
-        # Particiona o vetor (garante que todos os elementos menores que o pivô estejam à esquerda dele e os maiores, à direita)
-        i = l
-        j = r
-        while i < j:
-            while datagrid.list[i].count <= pivot.count and i < r:
-                i += 1
-            while datagrid.list[j].count > pivot.count and j > l:
-                j -= 1
-            if i < j:
-                datagrid.swap_row(i, j)
-        datagrid.swap_row(l, j)
+        # Atualiza a lista de eventos, concatenando as parcelas na ordem correta
+        self.list[low:high+1] = lower_than_pivot + equal_to_pivot + greater_than_pivot
 
         # Retorna o índice do pivô
-        return j
+        return low + len(lower_than_pivot)
 
     @timeit
-    def __quick_select(self, datagrid, l, r, k):
+    def __quickselect(self, low, high, k, strategy=None):
         """Encontra o k-ésimo menor elemento do DataGrid através do algoritmo de Quick Select
         
         Args:
             datagrid (DataGrid): DataGrid a ser analisado
-            l (int): índice inicial do intervalo
-            r (int): índice final do intervalo
+            low (int): índice inicial do intervalo
+            high (int): índice final do intervalo
             k (int): índice do elemento procurado
-        """
-        
-        # Caso base
-        if l == r:
-            return datagrid.list[l]
-        
-        # Particiona o vetor e retorna o índice do pivô
-        j = self.__partition(datagrid, l, r)
+            strategy (str, optional): estratégia de escolha do pivô. Defaults to None.
 
-        # Verifica se o elemento procurado é o pivô
-        if k == j:
-            return datagrid.list[j]
-        
-        # Verifica se o elemento procurado está à esquerda do pivô
-        elif k < j:
-            return self.__quick_select(datagrid, l, j-1, k)
-        
-        # Verifica se o elemento procurado está à direita do pivô
+        Returns:
+            Event: k-ésimo menor elemento do DataGrid
+        """
+
+        # Particiona o intervalo
+        pivot_index = self.__partition(low, high, strategy=strategy)
+
+        # Se o índice do pivô for igual ao índice do elemento procurado, retorna o pivô
+        if pivot_index == k:
+            return self.list[pivot_index]
+
+        # Se o índice do pivô for maior que o índice do elemento procurado, chama a função recursivamente para o intervalo à esquerda do pivô
+        elif pivot_index > k:
+            return self.__quickselect(low, pivot_index-1, k, strategy=strategy)
+
+        # Se o índice do pivô for menor que o índice do elemento procurado, chama a função recursivamente para o intervalo à direita do pivô
         else:
-            return self.__quick_select(datagrid, j+1, r, k)
-        
+            return self.__quickselect(pivot_index+1, high, k, strategy=strategy)
+
+
     @timeit
     def select_count(self, i, j, strategy="quickselect"):
         """Seleciona um intervalo de entradas do DataGrid com base na coluna count ordenada de forma crescente.
@@ -1086,55 +1076,75 @@ class DataGrid():
         Args:
             i (int): índice inicial do intervalo
             j (int): índice final do intervalo
+            strategy (str, optional): Estratégia de seleção. Defaults to "quickselect".
+
+        Returns:
+            DataGrid: Novo DataGrid contendo os Events que correspondem ao intervalo.
         """
 
-        # Caso o datagrid esteja ordenado, basta retornar o intervalo entre a i-ésima e a j-ésima entrada
+        # Cria uma cópia do datagrid (para não alterar o original)
+        datagrid_copy = self.copy()
+
+        # Caso o datagrid já esteja ordenado pela coluna count, basta selecionar o intervalo desejado
         if self.ordered_by == "count":
 
-            datagrid_selected = DataGrid()
-
+            # Caso esteja ordenado de forma ascendente, basta selecionar o intervalo
             if self.direction == "asc":
-                datagrid_selected.list = self.list[i:j+1]
+                datagrid_copy.list = datagrid_copy.list[i:j+1]
+
+            # Caso esteja ordenado de forma descendente, é necessário inverter a ordem do intervalo
             else:
-                datagrid_selected.list = self.list[self.size-(i)-1 : self.size-(j+1)-1 : -1]
+                datagrid_copy.list = datagrid_copy.list[j:i-1:-1]
 
-            datagrid_selected.size = len(datagrid_selected.list)
+            # Atualiza o tamanho do datagrid
+            datagrid_copy.size = j - i + 1
 
-            return datagrid_selected
-        
-        # Caso contrário, usamos quickselect para encontrar o i-ésimo e o j-ésimo menor elemento
+            return datagrid_copy
+    
+        # Caso contrário, é necessário aplicar alguma das estratégias
         else:
-            # Cria uma cópia do datagrid (para preservar o estado interno da estrutura de dados)
-            datagrid_copy = self.copy()
 
-            # Encontra o i-ésimo e o j-ésimo menor elemento
-            i_min = datagrid_copy.__quick_select(datagrid_copy, 0, len(datagrid_copy.list)-1, i)
-            # Particiona o vetor novamente (garante que todos os elementos menores que o i-ésimo estejam à esquerda dele)
-            ith_item = datagrid_copy.__partition(datagrid_copy, 0, len(datagrid_copy.list)-1, i_min)
-            # Remove da lista todos os elementos menores que o i-ésimo e atualiza o tamanho do datagrid
-            datagrid_copy.list = datagrid_copy.list[ith_item+1:]
-            datagrid_copy.size = len(datagrid_copy.list)
+            # Ordena o datagrid e seleciona o intervalo 
+            if strategy == "order_and_select":
 
-            # Executa o quickselect novamente para encontrar o j-ésimo menor elemento
-            j_min = datagrid_copy.__quick_select(datagrid_copy, 0, datagrid_copy.size-1, j)
-            # Particiona o vetor novamente (garante que todos os elementos maiores que o j-ésimo estejam à direita dele)
-            jth_item = datagrid_copy.__partition(datagrid_copy, 0, datagrid_copy.size-1, j_min)
-            # Remove da lista todos os elementos maiores que o j-ésimo e atualiza o tamanho do datagrid
-            datagrid_copy.list = datagrid_copy.list[:jth_item+1]
-            datagrid_copy.size = len(datagrid_copy.list)
+                # Ordena o datagrid
+                datagrid_copy.sort("count", "asc")
 
-            # Ordena o datagrid resultante de acordo com a coluna count
-            datagrid_copy.sort("count", "asc")
-
-            # Caso o datagrid final tenha mais do que o número esperado de elementos (j-i+1), remove os últimos elementos
-            if datagrid_copy.size > j-i+1:
-                datagrid_copy.list = datagrid_copy.list[:j-i+1]
+                # Seleciona o intervalo chamando a função recursivamente
+                return datagrid_copy.select_count(i, j)
+            
+            # Aplica o algoritmo de quickselect para selecionar o intervalo
+            elif strategy == "quickselect" or strategy == "quickselect_median_of_medians":
+    
+                # Encontra o i-esimo menor elemento do datagrid usando QuickSelect
+                ith_event = datagrid_copy.__quickselect(0, datagrid_copy.size-1, i, strategy=strategy)
+                # Particiona o vetor novamente
+                ith_event_index = datagrid_copy.__partition(0, datagrid_copy.size-1, pivot=ith_event)
+                # Remove da lista todos os elementos menores que o i-ésimo e atualiza o tamanho do datagrid
+                datagrid_copy.list = datagrid_copy.list[ith_event_index:]
                 datagrid_copy.size = len(datagrid_copy.list)
 
-            print("Tamanho final do datagrid (após revisão): ", datagrid_copy.size)
+                # Encontra o j-esimo menor elemento do datagrid usando QuickSelect
+                jth_event = datagrid_copy.__quickselect(0, datagrid_copy.size-1, j-i, strategy=strategy)
+                # Particiona o vetor novamente
+                jth_event_index = datagrid_copy.__partition(0, datagrid_copy.size-1, pivot=jth_event)
+                # Remove da lista todos os elementos maiores que o j-ésimo e atualiza o tamanho do datagrid
+                datagrid_copy.list = datagrid_copy.list[:jth_event_index+1]
+                datagrid_copy.size = len(datagrid_copy.list)
 
-            # Retorna o datagrid apenas com o intervalo entre os dois elementos
-            return datagrid_copy
+                # Ordena o datagrid de forma ascendente de acordo com a coluna count
+                datagrid_copy.sort("count", "asc")
+
+                # Caso o datagrid final tenha mais do que o número esperado de elementos (j-i+1), remove os últimos elementos
+                if datagrid_copy.size > j-i+1:
+                    datagrid_copy.list = datagrid_copy.list[:j-i+1]
+                    datagrid_copy.size = len(datagrid_copy.list)
+                
+                return datagrid_copy
+
+            # Se nenhuma estratégia for escolhida, utiliza o quickselect
+            else:
+                return self.select_count(i, j, "quickselect")
 
 class Event():
     """Objeto que armazena uma linha de um DataGrid
@@ -1158,113 +1168,117 @@ class Event():
         self.timestamp = date_to_timestamp(self.creation_date)
 
 if __name__ == "__main__":
-     # Criar uma instância de DataGrid
-    datagrid = DataGrid()
+    #  # Criar uma instância de DataGrid
+    # datagrid = DataGrid()
 
-    # Inserir evento com base em dicionário de tuplas
-    data_dict = {
-        "id": 1,
-        "owner_id": "ab123",
-        "creation_date": "2023/09/26 14:00:00",
-        "count": 43,
-        "name": "Evento 1",
-        "content": "Conteúdo do Evento 1"
-    }
-    datagrid.insert_row(data_dict)
+    # # Inserir evento com base em dicionário de tuplas
+    # data_dict = {
+    #     "id": 1,
+    #     "owner_id": "ab123",
+    #     "creation_date": "2023/09/26 14:00:00",
+    #     "count": 43,
+    #     "name": "Evento 1",
+    #     "content": "Conteúdo do Evento 1"
+    # }
+    # datagrid.insert_row(data_dict)
 
-    # Inserir outro evento com base em dicionário de tuplas
-    data_dict2 = {
-        "id": 2,
-        "owner_id": "ac124",
-        "creation_date": "2023/09/26 15:25:32",
-        "count": 25,
-        "name": "Evento 2",
-        "content": "Conteúdo do Evento 2"
-    }
-    datagrid.insert_row(data_dict2)
+    # # Inserir outro evento com base em dicionário de tuplas
+    # data_dict2 = {
+    #     "id": 2,
+    #     "owner_id": "ac124",
+    #     "creation_date": "2023/09/26 15:25:32",
+    #     "count": 25,
+    #     "name": "Evento 2",
+    #     "content": "Conteúdo do Evento 2"
+    # }
+    # datagrid.insert_row(data_dict2)
 
-    # Verificar o conteúdo do DataGrid
-    datagrid.show()
+    # # Verificar o conteúdo do DataGrid
+    # datagrid.show()
 
-    print("Após trocar linha 1 com linha 2")
-    # Trocar linha 1 com linha 2
-    datagrid.swap_row(0,1)
+    # print("Após trocar linha 1 com linha 2")
+    # # Trocar linha 1 com linha 2
+    # datagrid.swap_row(0,1)
 
-    datagrid.show()
+    # datagrid.show()
 
-    print("Ordenando DataGrid pela coluna ID com Insertion Sort")
-    datagrid.insertion_sort("id")
+    # print("Ordenando DataGrid pela coluna ID com Insertion Sort")
+    # datagrid.insertion_sort("id")
 
-    datagrid.show()
+    # datagrid.show()
 
-    print("Ordenando de forma decrescente DataGrid pela coluna ID com Selection Sort")
-    datagrid.selection_sort("id", "desc")
+    # print("Ordenando de forma decrescente DataGrid pela coluna ID com Selection Sort")
+    # datagrid.selection_sort("id", "desc")
 
-    datagrid.show()
+    # datagrid.show()
     
-    print("Após deletar o evento 2 pela sua posição")
+    # print("Após deletar o evento 2 pela sua posição")
 
-    # Deletar um evento
-    datagrid.delete_row("position", 0)
+    # # Deletar um evento
+    # datagrid.delete_row("position", 0)
 
-    # Verificar o conteúdo do DataGrid
-    datagrid.show()
+    # # Verificar o conteúdo do DataGrid
+    # datagrid.show()
 
-    print("Reinserindo evento 2 e buscando pelo evento 1")
+    # print("Reinserindo evento 2 e buscando pelo evento 1")
     
-    # Buscar por elemento
-    datagrid.insert_row(data_dict2)
-    datagrid.search("id", 1).show()
-    datagrid.search("owner_id", "ab123").show()
+    # # Buscar por elemento
+    # datagrid.insert_row(data_dict2)
+    # datagrid.search("id", 1).show()
+    # datagrid.search("owner_id", "ab123").show()
 
-    print("Buscando por conteúdo")
+    # print("Buscando por conteúdo")
     
-    # Buscar por strings que contém outra    
-    datagrid.search("content", "Conteúdo").show()
-    datagrid.search("name", "2").show()
+    # # Buscar por strings que contém outra    
+    # datagrid.search("content", "Conteúdo").show()
+    # datagrid.search("name", "2").show()
 
-    print("Buscando por count entre 25 e 43")
+    # print("Buscando por count entre 25 e 43")
     
-    # Buscar por intervalo    
-    datagrid.search("count", (25,43)).show()
+    # # Buscar por intervalo    
+    # datagrid.search("count", (25,43)).show()
     
-    print("Buscando por data entre 2023/09/26 14:00:01 e 2023/09/26 17:00:00")
+    # print("Buscando por data entre 2023/09/26 14:00:01 e 2023/09/26 17:00:00")
     
-    # Buscar por intervalo
-    datagrid.search("creation_date", ("2023/09/26 14:00:01", "2023/09/26 17:00:00")).show()
+    # # Buscar por intervalo
+    # datagrid.search("creation_date", ("2023/09/26 14:00:01", "2023/09/26 17:00:00")).show()
 
     # Carregando dados a partir de um CSV
     datagrid_csv = DataGrid()
-    datagrid_csv.read_csv("data/dados_gerados.csv", ";")
+    # datagrid_csv.read_csv("data/dados_gerados.csv", ";")
+    datagrid_csv.read_csv("data_base2/data_2e16.csv", ",")
     # datagrid_csv.show()
 
-    print("select_count(14, 340) para um vetor não ordenado")
+    print("select_count para um vetor não ordenado")
     print(f"Ordenação: {datagrid_csv.ordered_by}")
-    selected_datagrid = datagrid_csv.select_count(14, 340)
-    # selected_datagrid.show()
+    selected_datagrid = datagrid_csv.select_count(10008, 10013, "quickselect_median_of_medians")
+    selected_datagrid.show()
     print(selected_datagrid.size)
     
     get_execution_time("select_count", True)
-
-    print("select_count(14, 340) para um vetor ordenado (asc)")
-    datagrid_csv.insertion_sort("count")
-    print(f"Ordenação: {datagrid_csv.ordered_by} ({datagrid_csv.direction})")
-    selected_datagrid = datagrid_csv.select_count(14, 340)
-    # selected_datagrid.show()
-    print(selected_datagrid.size)
+    get_execution_time("__quickselect", True)
+    get_execution_time("__partition", True)
     
-    get_execution_time("select_count", True)
 
-    print("select_count(14, 340) para um vetor ordenado (desc)")
-    datagrid_csv.insertion_sort("count", "desc")
-    print(f"Ordenação: {datagrid_csv.ordered_by} ({datagrid_csv.direction})")
-    selected_datagrid = datagrid_csv.select_count(14, 340)
-    # selected_datagrid.show()
-    print(selected_datagrid.size)
+    # print("select_count(14, 340) para um vetor ordenado (asc)")
+    # datagrid_csv.insertion_sort("count")
+    # print(f"Ordenação: {datagrid_csv.ordered_by} ({datagrid_csv.direction})")
+    # selected_datagrid = datagrid_csv.select_count(14, 340)
+    # # selected_datagrid.show()
+    # print(selected_datagrid.size)
     
-    get_execution_time("select_count", True)
+    # get_execution_time("select_count", True)
 
-    print("Teste merge_sort por ID")
-    datagrid_csv.merge_sort("id")
-    print("Ordenação:", datagrid_csv.ordered_by)
-    datagrid_csv.show()
+    # print("select_count(14, 340) para um vetor ordenado (desc)")
+    # datagrid_csv.insertion_sort("count", "desc")
+    # print(f"Ordenação: {datagrid_csv.ordered_by} ({datagrid_csv.direction})")
+    # selected_datagrid = datagrid_csv.select_count(14, 340)
+    # # selected_datagrid.show()
+    # print(selected_datagrid.size)
+    
+    # get_execution_time("select_count", True)
+
+    # print("Teste merge_sort por ID")
+    # datagrid_csv.merge_sort("id")
+    # print("Ordenação:", datagrid_csv.ordered_by)
+    # datagrid_csv.show()
