@@ -216,9 +216,9 @@ class DataGrid():
         """
 
         if strategy == "insertion_sort":
-            self.insertion_sort(column, direction, optimized = optimized)
+            self.insertion_sort(column, direction, optimized)
         elif strategy == "selection_sort":
-            self.selection_sort(column, direction, optimized = optimized)
+            self.selection_sort(column, direction, optimized)
         elif strategy == "merge_sort":
              self.merge_sort(column, direction, start = 0, end = None)
         elif strategy == "quick_sort":
@@ -246,16 +246,17 @@ class DataGrid():
         if optimized:
             if self.ordered_by == column and self.direction == direction:
                 return
-            for i in self.size:
-                if getattr(self.list[i],column) > getattr(self.list[i],column) and direction == "asc":
-                    pass 
-                elif getattr(self.list[i],column) < getattr(self.list[i],column) and direction == "desc":
-                    pass 
-                else:
-                    self.ordered_by == column 
-                    self.direction == direction
+            ordenada = True
+            for i in range(self.size-1):
+                if getattr(self.list[i],column) > getattr(self.list[i+1],column) and direction == "asc":
+                    ordenada = False 
+                elif getattr(self.list[i],column) < getattr(self.list[i+1],column) and direction == "desc":
+                    ordenada = False                
+            if ordenada:
+                self.ordered_by == column 
+                self.direction == direction  
             if self.ordered_by == column and self.direction == direction:
-                return
+                return 
         # Tamanho da entrada
         n = self.size        
         # Ordenanado em ordem crescente
@@ -534,13 +535,13 @@ class DataGrid():
         self.direction = direction
 
     @timeit
-    def radix_sort(self, column="owner_id", direction="asc", pos=0, type_code="ASCII", start=0, end=-1):
+    def radix_sort(self, lim = -1, column="owner_id", direction="asc", pos=0, type_code="ASCII", start=0, end=-1):
         """
         Ordena o DataGrid usando o algoritmo de ordenação Radix Sort.
 
         Args:
             pos (int): A posição do caractere a ser considerado durante a ordenação.
-            lim (int): O número de caracteres a serem considerados durante a ordenação.
+            lim (int, optinal): O número de caracteres a serem considerados durante a ordenação.
             column (str): O nome da coluna pela qual o DataGrid será ordenado.
             type_code (str, optional): O tipo de enumeração que será usada para cara char, padrão ASCII.
             start (int, optional): O índice inicial para a ordenação (padrão é 0).
@@ -550,93 +551,106 @@ class DataGrid():
         """
         if column == "id" or column == "count" or column == "timestamp":
             raise InvalidColumnError(column=column)
+        # Padrão para enumeração de char
         if column == "owner_id":
-            type_code = "alphanumeric"  
+            type_code = "alphanumeric"
+  
         if column == "creation_date":
             type_code = "date_type"
 
-
-        if type_code == "ASCII":
-            type_code_size = 128 
-        elif type_code == "alphanumeric":
-            type_code_size = 63
-        elif type_code == "date_type":
-            type_code_size = 13
-        # Se não for dado o fim do datagrid, fazer o fim a última linha
-        if end == -1:
-            end = self.size
-        # Número de caracteres no padrão type_code, fs inicialmente guarda a frequência de elementos
-        # o elemento de valor n, é informado sua frequência na n+1-ésima entrada da lista fs
-        fs = [0] * (type_code_size + 1)
-        # Lista temporaria para inserir os valores ordenados
-        temp = [0] * (self.size)
-        n = end-start # Palavras no slice
-        cont = 0 # Num de palavras que foram acrescentados " "
-        for i in range(start, end):
-            # Caso uma palavra conter menos letras que outras
-            try:
-                getattr(self.list[i], column)[pos]
-            except IndexError:
-                palavra_atual = getattr(self.list[i], column)
-                # Adiciona um espaço ao final da palavra se necessário
-                if len(palavra_atual) < pos + 1:
-                    setattr(self.list[i], column, palavra_atual + " ")
-                    cont += 1
-            if cont == n: #Parando de fazer comparações, todos os elementos já estão ordenados
-                return
-            # Guardando caractere com seu valor ASCII, a frequência em que ele aparece na pos
-            if direction == "asc" and type_code == "ASCII": 
-                fs[ord(getattr(self.list[i], column)[pos]) + 1] += 1
-            elif direction == "asc" and type_code == "alphanumeric": 
-                fs[enumerated_alpha_numeric(getattr(self.list[i], column)[pos]) + 1] += 1
-            elif direction == "asc" and type_code == "date_type": 
-                fs[enumerated_date(getattr(self.list[i], column)[pos]) + 1] += 1
-            elif direction == "desc" and type_code == "ASCII":
-                fs[type_code_size - 1 - ord(getattr(self.list[i], column)[pos]) + 1] += 1
-            elif direction == "desc" and type_code == "alphanumeric": 
-                fs[type_code_size - 1 - enumerated_alpha_numeric(getattr(self.list[i], column)[pos]) + 1] += 1
-            elif direction == "desc" and type_code == "date_type": 
-                fs[type_code_size - 1 - enumerated_date(getattr(self.list[i], column)[pos]) + 1] += 1
-        # Guardando a entrada que o número repetiu e quantas vezes ele repetiu
-        aux = []
-        # Entrada 1 do vetor fs e última entrada do vetor fs, guarda apenas aqueles que se repete mais de uma vez
-        for j in range(1,type_code_size + 1):
-          # Se o caractere se repete
-            if fs[j]>1:
-                aux.append([j-1, fs[j]])
-        # Calculando onde cada elemento da lista começa e o espaço para guardar cada caractere 
-        for j in range(1,type_code_size + 1):
-            fs[j]+=fs[j-1]
-        # Inicio da realocação de elementos, É AQUI QUE NÃO MUDAMOS OS ELEMENTOS JÁ MUDADOS ANTERIORMENTE!!!
-        for i in range(start,end):#por causa do start e end!!!!
-            if i == start:
-            # Inicio da iteração, onde o elemento que contém mais de uma repetição começa
-                aux_start=[]
-                for k in aux:
-                    aux_start.append(fs[k[0]] + start)
-            # Realocando elemento j
-            if direction == "asc" and type_code == "ASCII": 
-                j = ord(getattr(self.list[i], column)[pos])
-            elif direction == "asc" and type_code == "alphanumeric": 
-                j = enumerated_alpha_numeric(getattr(self.list[i], column)[pos])
-            elif direction == "asc" and type_code == "date_type": 
-                j = enumerated_date(getattr(self.list[i], column)[pos])
-            elif direction == "desc" and type_code == "ASCII": 
-                j = type_code_size  -1 - ord(getattr(self.list[i], column)[pos])
-            elif direction == "desc" and type_code == "alphanumeric": 
-                j = type_code_size -1 - enumerated_alpha_numeric(getattr(self.list[i], column)[pos])
-            elif direction == "desc" and type_code == "date_type": 
-                j = type_code_size -1 - enumerated_date(getattr(self.list[i], column)[pos])
-            temp[fs[j] + start] = self.list[i]
-            fs[j] += 1 # Realocando onde o próximo valor j vai entrar na lista
-        for i in range(start,end):
-            if self.list[i] != temp[i]:
-                # Realocando na lista original
-                self.list[i] = temp[i]
-        # Se tiver caracteres repetidos na posição
-        if len(aux) != 0:
-            for k in range(len(aux)):
-                self.radix_sort(column, direction, pos+1, type_code, aux_start[k], aux_start[k] + aux[k][1])
+        # Verificando se o lim foi está de acordo
+        if  lim <= -1 or lim > 0:
+            # Num de char
+            if type_code == "ASCII":
+                type_code_size = 128 
+            elif type_code == "alphanumeric":
+                type_code_size = 63
+            elif type_code == "date_type":
+                type_code_size = 13
+            # Se não for dado o fim do datagrid, fazer o fim a última linha
+            if end == -1:
+                end = self.size
+            # Número de caracteres no padrão type_code, fs inicialmente guarda a frequência de elementos
+            # o elemento de valor n, é informado sua frequência na n+1-ésima entrada da lista fs
+            fs = [0] * (type_code_size + 1)
+            # Lista temporaria para inserir os valores ordenados
+            temp = [0] * (self.size)
+            n = end-start # Palavras no slice
+            cont = 0 # Num de palavras que foram acrescentados " "
+            for i in range(start, end):
+                # Caso uma palavra não conter char na posição pos
+                try:
+                    getattr(self.list[i], column)[pos]
+                except IndexError:
+                    palavra_atual = getattr(self.list[i], column)
+                    # Adiciona um espaço ao final da palavra se necessário
+                    if len(palavra_atual) < pos + 1:
+                        setattr(self.list[i], column, palavra_atual + " ")
+                        # Aumenta 1 na palavra modificada
+                        cont += 1
+                if cont == n: #Parando de fazer comparações, caso acrescentarmos " " em todas palavras no slice
+                    return
+                # Guardando caractere com seu valor sendo index+1, o valor no vetor é a frequência em que ele aparece na pos atual
+                if direction == "asc" and type_code == "ASCII": 
+                    fs[ord(getattr(self.list[i], column)[pos]) + 1] += 1
+                elif direction == "asc" and type_code == "alphanumeric": 
+                    fs[enumerated_alpha_numeric(getattr(self.list[i], column)[pos]) + 1] += 1
+                elif direction == "asc" and type_code == "date_type": 
+                    fs[enumerated_date(getattr(self.list[i], column)[pos]) + 1] += 1
+                # No caso de descrescente só invertemos os valores de cada char
+                elif direction == "desc" and type_code == "ASCII":
+                    fs[type_code_size - 1 - ord(getattr(self.list[i], column)[pos]) + 1] += 1
+                elif direction == "desc" and type_code == "alphanumeric": 
+                    fs[type_code_size - 1 - enumerated_alpha_numeric(getattr(self.list[i], column)[pos]) + 1] += 1
+                elif direction == "desc" and type_code == "date_type": 
+                    fs[type_code_size - 1 - enumerated_date(getattr(self.list[i], column)[pos]) + 1] += 1
+            # Guardando o elemento que repetiu (o elemento é sua posição - 1 no vetor fs) e quantas vezes ele repetiu
+            # (quantas vezes ele repetiu é fs[sua pos])
+            aux = []
+            # Entrada 1 do vetor fs e última entrada do vetor fs, guarda apenas aqueles que se repete mais de uma vez
+            for j in range(1,type_code_size + 1):
+              # Se o caractere se repete
+                if fs[j]>1:
+                    aux.append([j-1, fs[j]])
+            # Calculando onde cada elemento da lista começa e o espaço para guardar cada caractere 
+            for j in range(1,type_code_size + 1):
+                fs[j]+=fs[j-1]
+            # Agora nosso fs guarda onde cada elemento (char valor num = j) vai começar (começa ser posto fs[j])
+            # Inicio da realocação de elementos, É AQUI QUE NÃO MUDAMOS OS ELEMENTOS JÁ MUDADOS ANTERIORMENTE!!!
+            for i in range(start,end):#por causa do start e end!!!!
+                if i == start:
+                # Inicio da resursão, onde o elemento que contém mais de uma repetição começa
+                    aux_start=[] # Guardando os starts das recursões, vamos aplicar a recursão só nos elementos repetidos, na pos+1 
+                    for k in aux:
+                        aux_start.append(fs[k[0]] + start) # k[0] é o valor do elemento, logo fs[k[0]] é onde ele começa
+                # Realocando elemento j
+                # Guardando caractere com seu valor numérico
+                if direction == "asc" and type_code == "ASCII": 
+                    j = ord(getattr(self.list[i], column)[pos])
+                elif direction == "asc" and type_code == "alphanumeric": 
+                    j = enumerated_alpha_numeric(getattr(self.list[i], column)[pos])
+                elif direction == "asc" and type_code == "date_type": 
+                    j = enumerated_date(getattr(self.list[i], column)[pos])
+                elif direction == "desc" and type_code == "ASCII": 
+                    j = type_code_size  -1 - ord(getattr(self.list[i], column)[pos])
+                elif direction == "desc" and type_code == "alphanumeric": 
+                    j = type_code_size -1 - enumerated_alpha_numeric(getattr(self.list[i], column)[pos])
+                elif direction == "desc" and type_code == "date_type": 
+                    j = type_code_size -1 - enumerated_date(getattr(self.list[i], column)[pos])
+                # Guardando vetor na posição correta
+                temp[fs[j] + start] = self.list[i]
+                # Somando mais 1 para o vetor ser posto no lado direito
+                fs[j] += 1 # Realocando onde o próximo valor j vai entrar na lista
+            for i in range(start,end):
+                if self.list[i] != temp[i]:
+                    # Realocando na lista original
+                    self.list[i] = temp[i]
+            # Se tiver caracteres repetidos na posição
+            if len(aux) != 0:
+                for k in range(len(aux)):
+                    # Fazemos um "Slice", para alterarmos vendo a pos+1 em apenas partes com caracteres repetidos
+                    # Note que dessa forma, se os primeiros caracteres forem todos diferente, a excecusão é O(n)
+                    self.radix_sort(lim -1, column, direction, pos+1, type_code, aux_start[k], aux_start[k] + aux[k][1])
         self.ordered_by = column
         self.direction = direction
 
@@ -940,6 +954,41 @@ class DataGrid():
     # TODO: implementar o MOM de acordo com a função sort (a partir do momento q ela reconhecer o melhor algoritmo para cada ordenação)
 
     @timeit
+    def __partition(self, datagrid, l, r, pivot=None):
+        """Particiona a lista de eventos, reordenando os eventos menores que o pivô, o pivô, e os eventos maiores que o pivô.
+        
+        Args:
+            datagrid (DataGrid): DataGrid a ser particionado
+            l (int): índice inicial do intervalo
+            r (int): índice final do intervalo
+            return_partition (str, optional): qual partição retornar, "Left" para a partição com elementos menores que o pivô, "Right" para a partição com elementos maiores que o pivô. Defaults to "Left".
+        
+        Returns:
+            DataGrid: DataGrid com a partição selecionada
+        """
+        
+        # Escolhe o pivô (por padrão, o último elemento)
+        if pivot == None:
+            pivot = datagrid.list[r]
+
+        # pivot = self.__median_of_medians(datagrid.list[l:r+1])
+
+        # Particiona o vetor
+        i = l
+        j = r
+        while i < j:
+            while datagrid.list[i].count <= pivot.count and i < r:
+                i += 1
+            while datagrid.list[j].count > pivot.count and j > l:
+                j -= 1
+            if i < j:
+                datagrid.swap_row(i, j)
+        datagrid.swap_row(l, j)
+
+        # Retorna o índice do pivô
+        return j
+
+    @timeit
     def __quick_select(self, datagrid, l, r, k):
         """Encontra o k-ésimo menor elemento do DataGrid através do algoritmo de Quick Select
         
@@ -954,18 +1003,8 @@ class DataGrid():
         if l == r:
             return datagrid.list[l]
         
-        # Particiona o vetor
-        pivot = datagrid.list[l]
-        i = l
-        j = r
-        while i < j:
-            while datagrid.list[i].count <= pivot.count and i < r:
-                i += 1
-            while datagrid.list[j].count > pivot.count and j > l:
-                j -= 1
-            if i < j:
-                datagrid.swap_row(i, j)
-        datagrid.swap_row(l, j)
+        # Particiona o vetor e retorna o índice do pivô
+        j = self.__partition(datagrid, l, r)
 
         # Verifica se o elemento procurado é o pivô
         if k == j:
@@ -980,16 +1019,16 @@ class DataGrid():
             return self.__quick_select(datagrid, j+1, r, k)
         
     @timeit
-    def select_count(self, i, j):
+    def select_count(self, i, j, strategy="quickselect"):
         """Seleciona um intervalo de entradas do DataGrid com base na coluna count ordenada de forma crescente.
 
         Args:
             i (int): índice inicial do intervalo
             j (int): índice final do intervalo
         """
-
+        
         # Caso o datagrid esteja ordenado, basta retornar o intervalo entre a i-ésima e a j-ésima entrada
-        if self.ordered_by == "Count":
+        if self.ordered_by == "count":
 
             datagrid_selected = DataGrid()
 
@@ -997,6 +1036,8 @@ class DataGrid():
                 datagrid_selected.list = self.list[i:j+1]
             else:
                 datagrid_selected.list = self.list[self.size-(i)-1 : self.size-(j+1)-1 : -1]
+
+            datagrid_selected.size = len(datagrid_selected.list)
 
             return datagrid_selected
         
@@ -1006,11 +1047,30 @@ class DataGrid():
             datagrid_copy = self.copy()
 
             # Encontra o i-ésimo e o j-ésimo menor elemento
-            i_min = self.__quick_select(datagrid_copy, 0, len(datagrid_copy.list)-1, i)
-            j_min = self.__quick_select(datagrid_copy, 0, len(datagrid_copy.list)-1, j)
+            i_min = datagrid_copy.__quick_select(datagrid_copy, 0, len(datagrid_copy.list)-1, i)
+            # Particiona o vetor novamente (garante que todos os elementos menores que o i-ésimo estejam à esquerda dele)
+            ith_item = datagrid_copy.__partition(datagrid_copy, 0, len(datagrid_copy.list)-1, i_min)
+            # Remove da lista todos os elementos menores que o i-ésimo e atualiza o tamanho do datagrid
+            datagrid_copy.list = datagrid_copy.list[ith_item+1:]
+            datagrid_copy.size = len(datagrid_copy.list)
 
-            # Encontra o intervalo entre os dois elementos
-            datagrid_copy.list = datagrid_copy.list[datagrid_copy.list.index(i_min):datagrid_copy.list.index(j_min)+1]
+            # Executa o quickselect novamente para encontrar o j-ésimo menor elemento
+            j_min = datagrid_copy.__quick_select(datagrid_copy, 0, datagrid_copy.size-1, j)
+            # Particiona o vetor novamente (garante que todos os elementos maiores que o j-ésimo estejam à direita dele)
+            jth_item = datagrid_copy.__partition(datagrid_copy, 0, datagrid_copy.size-1, j_min)
+            # Remove da lista todos os elementos maiores que o j-ésimo e atualiza o tamanho do datagrid
+            datagrid_copy.list = datagrid_copy.list[:jth_item+1]
+            datagrid_copy.size = len(datagrid_copy.list)
+
+            # Ordena o datagrid resultante de acordo com a coluna count
+            datagrid_copy.sort("count", "asc")
+
+            # Caso o datagrid final tenha mais do que o número esperado de elementos (j-i+1), remove os últimos elementos
+            if datagrid_copy.size > j-i+1:
+                datagrid_copy.list = datagrid_copy.list[:j-i+1]
+                datagrid_copy.size = len(datagrid_copy.list)
+
+            print("Tamanho final do datagrid (após revisão): ", datagrid_copy.size)
 
             # Retorna o datagrid apenas com o intervalo entre os dois elementos
             return datagrid_copy
@@ -1115,32 +1175,33 @@ if __name__ == "__main__":
     # Carregando dados a partir de um CSV
     datagrid_csv = DataGrid()
     datagrid_csv.read_csv("data/dados_gerados.csv", ";")
-    datagrid_csv.show()
+    # datagrid_csv.show()
 
-    print("select_count(2, 5) para um vetor não ordenado")
+    print("select_count(14, 340) para um vetor não ordenado")
     print(f"Ordenação: {datagrid_csv.ordered_by}")
-    # datagrid_csv.select_count(2, 5).show()
-    datagrid_csv.select_count(2, 5)
+    selected_datagrid = datagrid_csv.select_count(14, 340)
+    # selected_datagrid.show()
+    print(selected_datagrid.size)
     
     get_execution_time("select_count", True)
 
-    print("select_count(2, 5) para um vetor ordenado (asc)")
+    print("select_count(14, 340) para um vetor ordenado (asc)")
     datagrid_csv.insertion_sort("count")
     print(f"Ordenação: {datagrid_csv.ordered_by} ({datagrid_csv.direction})")
-    # datagrid_csv.select_count(2, 5).show()
-    datagrid_csv.select_count(2, 5)
+    selected_datagrid = datagrid_csv.select_count(14, 340)
+    # selected_datagrid.show()
+    print(selected_datagrid.size)
     
     get_execution_time("select_count", True)
 
-    print("select_count(2, 5) para um vetor ordenado (desc)")
+    print("select_count(14, 340) para um vetor ordenado (desc)")
     datagrid_csv.insertion_sort("count", "desc")
     print(f"Ordenação: {datagrid_csv.ordered_by} ({datagrid_csv.direction})")
-    # datagrid_csv.select_count(2, 5).show()
-    datagrid_csv.select_count(2, 5)
+    selected_datagrid = datagrid_csv.select_count(14, 340)
+    # selected_datagrid.show()
+    print(selected_datagrid.size)
     
     get_execution_time("select_count", True)
-
-    # TODO: implementar o decorador @timeit para as demais funções após discutir os métodos que receberão o decorador
 
     print("Teste merge_sort por ID")
     datagrid_csv.merge_sort("id")

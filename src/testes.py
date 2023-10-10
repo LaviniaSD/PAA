@@ -7,4 +7,5 @@ sample = dg.DataGrid()
 
 # Populando datagrid
 dg.DataGrid.read_csv(sample, "data\sample.csv", separator=",")
-dg.DataGrid.radix_sort(sample, pos=0, column="owner_id", lim=20, start=0, end=-1, direction="asc", not_sort=True)
+dg.DataGrid.insertion_sort(sample, column="id", direction="asc", optimized = True)
+dg.DataGrid.show(sample)
