@@ -1125,7 +1125,7 @@ if __name__ == "__main__":
     get_execution_time("select_count", True)
 
     print("select_count(2, 5) para um vetor ordenado (asc)")
-    datagrid_csv.insertion_sort("Count")
+    datagrid_csv.insertion_sort("count")
     print(f"Ordenação: {datagrid_csv.ordered_by} ({datagrid_csv.direction})")
     # datagrid_csv.select_count(2, 5).show()
     datagrid_csv.select_count(2, 5)
@@ -1133,7 +1133,7 @@ if __name__ == "__main__":
     get_execution_time("select_count", True)
 
     print("select_count(2, 5) para um vetor ordenado (desc)")
-    datagrid_csv.insertion_sort("Count", "desc")
+    datagrid_csv.insertion_sort("count", "desc")
     print(f"Ordenação: {datagrid_csv.ordered_by} ({datagrid_csv.direction})")
     # datagrid_csv.select_count(2, 5).show()
     datagrid_csv.select_count(2, 5)
@@ -1144,15 +1144,5 @@ if __name__ == "__main__":
 
     print("Teste merge_sort por ID")
     datagrid_csv.merge_sort("id")
-    print("Ordenação:", datagrid_csv.ordered_by)
-    datagrid_csv.show()
-
-    print("Teste merge_sort por Owner ID")
-    datagrid_csv.merge_sort("owner_id")
-    print("Ordenação:", datagrid_csv.ordered_by)
-    datagrid_csv.show()
-
-    print("Teste merge_sort desc por creation_date")
-    datagrid_csv.merge_sort("creation_date", "desc")
     print("Ordenação:", datagrid_csv.ordered_by)
     datagrid_csv.show()

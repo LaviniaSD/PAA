@@ -98,166 +98,166 @@ def criar_arquivo_csv(nome_arquivo, dados, separador=','):
     dados.to_csv(nome_arquivo, sep=separador, index=False)
 
 # Exemplo de uso da função para criar um arquivo CSV com um ponto e vírgula como separador
-nome_arquivo = './data/dados_gerados_big_4.csv'
-num_linhas = 10000
-separador = ','
+# nome_arquivo = './data/dados_gerados_big_4.csv'
+# num_linhas = 10000
+# separador = ','
 
-dados = gerar_dados(num_linhas)
-criar_arquivo_csv(nome_arquivo, dados, separador)
-
-
-nome_arquivo = './data/dados_gerados_big_5.csv'
-num_linhas = 10000
-separador = ','
-
-dados = gerar_dados(num_linhas)
-criar_arquivo_csv(nome_arquivo, dados, separador)
-
-nome_arquivo = './data/dados_gerados_big_6.csv'
-num_linhas = 10000
-separador = ','
-
-dados = gerar_dados(num_linhas)
-criar_arquivo_csv(nome_arquivo, dados, separador)
-
-nome_arquivo = './data/dados_gerados_big_7.csv'
-num_linhas = 10000
-separador = ','
-
-dados = gerar_dados(num_linhas)
-criar_arquivo_csv(nome_arquivo, dados, separador)
-
-nome_arquivo = './data/dados_gerados_big_8.csv'
-num_linhas = 10000
-separador = ','
-
-dados = gerar_dados(num_linhas)
-criar_arquivo_csv(nome_arquivo, dados, separador)
+# dados = gerar_dados(num_linhas)
+# criar_arquivo_csv(nome_arquivo, dados, separador)
 
 
-nome_arquivo = './data/dados_gerados_big_9.csv'
-num_linhas = 10000
-separador = ','
+# nome_arquivo = './data/dados_gerados_big_5.csv'
+# num_linhas = 10000
+# separador = ','
 
-dados = gerar_dados(num_linhas)
-criar_arquivo_csv(nome_arquivo, dados, separador)
+# dados = gerar_dados(num_linhas)
+# criar_arquivo_csv(nome_arquivo, dados, separador)
 
-nome_arquivo = './data/dados_gerados_big_10.csv'
-num_linhas = 10000
-separador = ','
+# nome_arquivo = './data/dados_gerados_big_6.csv'
+# num_linhas = 10000
+# separador = ','
 
-dados = gerar_dados(num_linhas)
-criar_arquivo_csv(nome_arquivo, dados, separador)
+# dados = gerar_dados(num_linhas)
+# criar_arquivo_csv(nome_arquivo, dados, separador)
 
-nome_arquivo = './data/dados_gerados_big_11.csv'
-num_linhas = 10000
-separador = ','
+# nome_arquivo = './data/dados_gerados_big_7.csv'
+# num_linhas = 10000
+# separador = ','
 
-dados = gerar_dados(num_linhas)
-criar_arquivo_csv(nome_arquivo, dados, separador)
+# dados = gerar_dados(num_linhas)
+# criar_arquivo_csv(nome_arquivo, dados, separador)
 
+# nome_arquivo = './data/dados_gerados_big_8.csv'
+# num_linhas = 10000
+# separador = ','
 
-
-
-nome_arquivo = './data/dados_gerados_1.csv'
-num_linhas = 1000
-separador = ','
-
-dados = gerar_dados(num_linhas)
-criar_arquivo_csv(nome_arquivo, dados, separador)
+# dados = gerar_dados(num_linhas)
+# criar_arquivo_csv(nome_arquivo, dados, separador)
 
 
-nome_arquivo = './data/dados_gerados_2.csv'
-num_linhas = 1000
-separador = ','
+# nome_arquivo = './data/dados_gerados_big_9.csv'
+# num_linhas = 10000
+# separador = ','
 
-dados = gerar_dados(num_linhas)
-criar_arquivo_csv(nome_arquivo, dados, separador)
+# dados = gerar_dados(num_linhas)
+# criar_arquivo_csv(nome_arquivo, dados, separador)
 
-nome_arquivo = './data/dados_gerados_3.csv'
-num_linhas = 1000
-separador = ','
+# nome_arquivo = './data/dados_gerados_big_10.csv'
+# num_linhas = 10000
+# separador = ','
 
-dados = gerar_dados(num_linhas)
-criar_arquivo_csv(nome_arquivo, dados, separador)
+# dados = gerar_dados(num_linhas)
+# criar_arquivo_csv(nome_arquivo, dados, separador)
 
+# nome_arquivo = './data/dados_gerados_big_11.csv'
+# num_linhas = 10000
+# separador = ','
 
-nome_arquivo = './data/dados_gerados_4.csv'
-num_linhas = 1000
-separador = ','
-
-dados = gerar_dados(num_linhas)
-criar_arquivo_csv(nome_arquivo, dados, separador)
-
-
-nome_arquivo = './data/dados_gerados_5.csv'
-num_linhas = 1000
-separador = ','
-
-dados = gerar_dados(num_linhas)
-criar_arquivo_csv(nome_arquivo, dados, separador)
-
-nome_arquivo = './data/dados_gerados_6.csv'
-num_linhas = 1000
-separador = ','
-
-dados = gerar_dados(num_linhas)
-criar_arquivo_csv(nome_arquivo, dados, separador)
-
-nome_arquivo = './data/dados_gerados_7.csv'
-num_linhas = 1000
-separador = ','
-
-dados = gerar_dados(num_linhas)
-criar_arquivo_csv(nome_arquivo, dados, separador)
-
-nome_arquivo = './data/dados_gerados_8.csv'
-num_linhas = 1000
-separador = ','
-
-dados = gerar_dados(num_linhas)
-criar_arquivo_csv(nome_arquivo, dados, separador)
-
-
-nome_arquivo = './data/dados_gerados_9.csv'
-num_linhas = 1000
-separador = ','
-
-dados = gerar_dados(num_linhas)
-criar_arquivo_csv(nome_arquivo, dados, separador)
-
-nome_arquivo = './data/dados_gerados_10.csv'
-num_linhas = 1000
-separador = ','
-
-dados = gerar_dados(num_linhas)
-criar_arquivo_csv(nome_arquivo, dados, separador)
-
-nome_arquivo = './data/dados_gerados_11.csv'
-num_linhas = 1000
-separador = ','
-
-dados = gerar_dados(num_linhas)
-criar_arquivo_csv(nome_arquivo, dados, separador)
+# dados = gerar_dados(num_linhas)
+# criar_arquivo_csv(nome_arquivo, dados, separador)
 
 
 
-nome_arquivo = './data/dados_gerados_big_big_.csv'
-num_linhas = 2000
-separador = ','
 
-dados = gerar_dados(num_linhas)
-criar_arquivo_csv(nome_arquivo, dados, separador)
+# nome_arquivo = './data/dados_gerados_1.csv'
+# num_linhas = 1000
+# separador = ','
 
-nome_arquivo = './data/dados_gerados_big_big_1.csv'
-num_linhas = 2000
-separador = ','
+# dados = gerar_dados(num_linhas)
+# criar_arquivo_csv(nome_arquivo, dados, separador)
 
-dados = gerar_dados(num_linhas)
-criar_arquivo_csv(nome_arquivo, dados, separador)
 
-nome_arquivo = './data/dados_gerados_big_big_2.csv'
-num_linhas = 2000
+# nome_arquivo = './data/dados_gerados_2.csv'
+# num_linhas = 1000
+# separador = ','
+
+# dados = gerar_dados(num_linhas)
+# criar_arquivo_csv(nome_arquivo, dados, separador)
+
+# nome_arquivo = './data/dados_gerados_3.csv'
+# num_linhas = 1000
+# separador = ','
+
+# dados = gerar_dados(num_linhas)
+# criar_arquivo_csv(nome_arquivo, dados, separador)
+
+
+# nome_arquivo = './data/dados_gerados_4.csv'
+# num_linhas = 1000
+# separador = ','
+
+# dados = gerar_dados(num_linhas)
+# criar_arquivo_csv(nome_arquivo, dados, separador)
+
+
+# nome_arquivo = './data/dados_gerados_5.csv'
+# num_linhas = 1000
+# separador = ','
+
+# dados = gerar_dados(num_linhas)
+# criar_arquivo_csv(nome_arquivo, dados, separador)
+
+# nome_arquivo = './data/dados_gerados_6.csv'
+# num_linhas = 1000
+# separador = ','
+
+# dados = gerar_dados(num_linhas)
+# criar_arquivo_csv(nome_arquivo, dados, separador)
+
+# nome_arquivo = './data/dados_gerados_7.csv'
+# num_linhas = 1000
+# separador = ','
+
+# dados = gerar_dados(num_linhas)
+# criar_arquivo_csv(nome_arquivo, dados, separador)
+
+# nome_arquivo = './data/dados_gerados_8.csv'
+# num_linhas = 1000
+# separador = ','
+
+# dados = gerar_dados(num_linhas)
+# criar_arquivo_csv(nome_arquivo, dados, separador)
+
+
+# nome_arquivo = './data/dados_gerados_9.csv'
+# num_linhas = 1000
+# separador = ','
+
+# dados = gerar_dados(num_linhas)
+# criar_arquivo_csv(nome_arquivo, dados, separador)
+
+# nome_arquivo = './data/dados_gerados_10.csv'
+# num_linhas = 1000
+# separador = ','
+
+# dados = gerar_dados(num_linhas)
+# criar_arquivo_csv(nome_arquivo, dados, separador)
+
+# nome_arquivo = './data/dados_gerados_11.csv'
+# num_linhas = 1000
+# separador = ','
+
+# dados = gerar_dados(num_linhas)
+# criar_arquivo_csv(nome_arquivo, dados, separador)
+
+
+
+# nome_arquivo = './data/dados_gerados_big_big_.csv'
+# num_linhas = 2000
+# separador = ','
+
+# dados = gerar_dados(num_linhas)
+# criar_arquivo_csv(nome_arquivo, dados, separador)
+
+# nome_arquivo = './data/dados_gerados_big_big_1.csv'
+# num_linhas = 2000
+# separador = ','
+
+# dados = gerar_dados(num_linhas)
+# criar_arquivo_csv(nome_arquivo, dados, separador)
+
+nome_arquivo = './data/giga_data.csv'
+num_linhas = 100000
 separador = ','
 
 dados = gerar_dados(num_linhas)
