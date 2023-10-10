@@ -226,7 +226,7 @@ class DataGrid():
         elif strategy == "heap_sort":
             self.heap_sort(column, direction)
         elif strategy == "radix_sort":
-            self.radix_sort(column, direction)
+            self.radix_sort(-1, column, direction)
         else:
             print("Algoritmo de ordenação inválido")
 
@@ -953,27 +953,88 @@ class DataGrid():
     
     # TODO: implementar o MOM de acordo com a função sort (a partir do momento q ela reconhecer o melhor algoritmo para cada ordenação)
 
+    def __median_of_medians(self, column="count"):
+        """Encontra o índice do elemento mediano do DataGrid através do algoritmo de Median of Medians
+        
+        Args:
+            column (str, optional): coluna a ser ordenada. Defaults to "count".
+
+        Returns:
+            int: índice do elemento mediano
+        """
+
+        # Caso o datagrid tenha tamanho <= 5, basta ordená-lo e retornar o índice do elemento mediano
+        if self.size <= 5:
+            self.quick_sort(column)
+            median_index = self.size // 2
+            return median_index
+        
+        # Caso contrário, particiona o datagrid em grupos de 5 elementos e encontra o elemento mediano de cada grupo
+        medians = DataGrid()
+        for i in range(0, self.size, 5):
+            group = DataGrid()
+            for j in range(0,5):
+                if i+j < self.size:
+                    group.insert_row(self.list[i+j])
+            group.quick_sort(column)
+            medians.insert_row(group.list[group.size//2])
+        # medians.show()
+        return medians.__median_of_medians(column)
+
+    def __median_of_medians_event_list(self, event_list):
+        """Encontra o índice do elemento mediano de uma lista de eventos através do algoritmo de Median of Medians
+        
+        Args:
+            event_list (list): lista de eventos a ser analisada
+
+        Returns:
+            int: índice do elemento mediano
+        """
+
+        # Caso o datagrid tenha tamanho <= 5, basta ordená-lo e retornar o índice do elemento mediano
+        if len(event_list) <= 5:
+            event_list.sort(key=lambda x: x.count)
+            median_index = len(event_list) // 2
+            return median_index
+        
+        # Caso contrário, particiona o datagrid em grupos de 5 elementos e encontra o elemento mediano de cada grupo
+        medians = []
+        for i in range(0, len(event_list), 5):
+            group = []
+            for j in range(0,5):
+                if i+j < len(event_list):
+                    group.append(event_list[i+j])
+            group.sort(key=lambda x: x.count)
+            medians.append(group[len(group)//2])
+        return self.__median_of_medians_event_list(medians)
+    
     @timeit
-    def __partition(self, datagrid, l, r, pivot=None):
+    def __partition(self, datagrid, l, r, pivot=None, strategy="median_of_medians_event_list"):
         """Particiona a lista de eventos, reordenando os eventos menores que o pivô, o pivô, e os eventos maiores que o pivô.
         
         Args:
-            datagrid (DataGrid): DataGrid a ser particionado
+            datagrid (DataGrid): DataGrid a ser analisado
             l (int): índice inicial do intervalo
             r (int): índice final do intervalo
-            return_partition (str, optional): qual partição retornar, "Left" para a partição com elementos menores que o pivô, "Right" para a partição com elementos maiores que o pivô. Defaults to "Left".
-        
+            pivot (Event, optional): pivô da partição. Defaults to None.
+            strategy (str, optional): estratégia de escolha do pivô. Defaults to None.
+
         Returns:
-            DataGrid: DataGrid com a partição selecionada
+            int: índice do pivô
         """
-        
-        # Escolhe o pivô (por padrão, o último elemento)
-        if pivot == None:
-            pivot = datagrid.list[r]
 
-        # pivot = self.__median_of_medians(datagrid.list[l:r+1])
+        if not pivot:
 
-        # Particiona o vetor
+            if strategy == "median_of_medians_datagrid":
+                pivot_index = self.__median_of_medians()
+            elif strategy == "median_of_medians_event_list":
+                pivot_index = self.__median_of_medians_event_list(datagrid.list)
+            else:
+                pivot_index = r
+
+            pivot = datagrid.list[pivot_index]
+
+        # Particiona o vetor (garante que todos os elementos menores que o pivô estejam à esquerda dele e os maiores, à direita)
         i = l
         j = r
         while i < j:
@@ -1026,7 +1087,7 @@ class DataGrid():
             i (int): índice inicial do intervalo
             j (int): índice final do intervalo
         """
-        
+
         # Caso o datagrid esteja ordenado, basta retornar o intervalo entre a i-ésima e a j-ésima entrada
         if self.ordered_by == "count":
 
