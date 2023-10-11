@@ -1,7 +1,5 @@
 import sys
 
-from datetime import datetime
-
 from exceptions import InvalidColumnError
 from timer import timeit, get_execution_time
 from utils import enumerated_alpha_numeric, enumerated_date, date_to_timestamp, string_lesser
@@ -1198,7 +1196,7 @@ if __name__ == "__main__":
     # Carregando dados a partir de um CSV
     datagrid_csv = DataGrid()
     # datagrid_csv.read_csv("data/dados_gerados.csv", ";")
-    datagrid_csv.read_csv("data_base2/data_2e16.csv", ",")
+    datagrid_csv.read_csv("data_base2/data_2e10.csv", ",")
     # datagrid_csv.show()
 
     print("select_count para um vetor não ordenado")
