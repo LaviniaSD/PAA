@@ -1044,7 +1044,11 @@ class DataGrid():
 
             # Caso esteja ordenado de forma descendente, é necessário inverter a ordem do intervalo
             else:
-                datagrid_copy.list = datagrid_copy.list[j:i-1:-1]
+                # Inverte a ordem do datagrid
+                datagrid_copy.list = datagrid_copy.list[::-1]
+                # Seleciona o intervalo
+                datagrid_copy.list = datagrid_copy.list[i:j+1]
+                
 
             # Atualiza o tamanho do datagrid
             datagrid_copy.size = j - i + 1
@@ -1196,36 +1200,42 @@ if __name__ == "__main__":
     # Carregando dados a partir de um CSV
     datagrid_csv = DataGrid()
     # datagrid_csv.read_csv("data/dados_gerados.csv", ";")
-    datagrid_csv.read_csv("data_base2/data_2e10.csv", ",")
+    datagrid_csv.read_csv("data_base2/data_2e4.csv", ",")
     # datagrid_csv.show()
 
-    print("select_count para um vetor não ordenado")
+    print("select_count para um vetor não ordenado usando 'order_and_select'")
     print(f"Ordenação: {datagrid_csv.ordered_by}")
-    selected_datagrid = datagrid_csv.select_count(10008, 10013, "quickselect_median_of_medians")
-    selected_datagrid.show()
+    selected_datagrid = datagrid_csv.select_count(12, 15, "order_and_select")
     print(selected_datagrid.size)
-    
+    selected_datagrid.show()
     get_execution_time("select_count", True)
-    get_execution_time("__quickselect", True)
-    get_execution_time("__partition", True)
-    
 
-    # print("select_count(14, 340) para um vetor ordenado (asc)")
-    # datagrid_csv.insertion_sort("count")
-    # print(f"Ordenação: {datagrid_csv.ordered_by} ({datagrid_csv.direction})")
-    # selected_datagrid = datagrid_csv.select_count(14, 340)
-    # # selected_datagrid.show()
-    # print(selected_datagrid.size)
+    print("select_count para um vetor não ordenado usando 'quickselect'")
+    print(f"Ordenação: {datagrid_csv.ordered_by}")
+    selected_datagrid = datagrid_csv.select_count(12, 15, "quickselect")
+    print(selected_datagrid.size)
+    selected_datagrid.show()
+    get_execution_time("select_count", True)
+
+    print("select_count para um vetor não ordenado usando 'quickselect_median_of_medians'")
+    print(f"Ordenação: {datagrid_csv.ordered_by}")
+    selected_datagrid = datagrid_csv.select_count(12, 15, "quickselect_median_of_medians")
+    print(selected_datagrid.size)
+    selected_datagrid.show()
+    get_execution_time("select_count", True)
     
+    # print("select_count() para um vetor ordenado (asc)")
+    # datagrid_csv.insertion_sort("count", "asc")
+    # print(f"Ordenação: {datagrid_csv.ordered_by} ({datagrid_csv.direction})")
+    # selected_datagrid = datagrid_csv.select_count(12, 15)
+    # selected_datagrid.show()
     # get_execution_time("select_count", True)
 
-    # print("select_count(14, 340) para um vetor ordenado (desc)")
+    # print("select_count() para um vetor ordenado (desc)")
     # datagrid_csv.insertion_sort("count", "desc")
     # print(f"Ordenação: {datagrid_csv.ordered_by} ({datagrid_csv.direction})")
-    # selected_datagrid = datagrid_csv.select_count(14, 340)
-    # # selected_datagrid.show()
-    # print(selected_datagrid.size)
-    
+    # selected_datagrid = datagrid_csv.select_count(12, 15)
+    # selected_datagrid.show()
     # get_execution_time("select_count", True)
 
     # print("Teste merge_sort por ID")
