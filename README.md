@@ -16,7 +16,6 @@ O módulo inclui um relatório detalhado, 'relatorio.ipynb', que oferece anális
 - `data_base2`: Contém arquivos CSV usados nos testes para as funções `select_count`.
 - `results_select_count`: Armazena arquivos CSV pós-processados pela função `select_count`.
 - `src`: Contém os arquivos essenciais para a geração de dados, criação do datagrid e suas funções:
-  - `analise_de_tempo.py` e `analise_de_tempo_teste.py` são usados para avaliar o desempenho em termos de tempo de execução das funções.
   - `analise_select_count.ipynb` é um notebook auxiliar para a análise de desempenho da função `select_count`.
   - `csv_maker` gera os CSV utilizados como exemplos.
   - `datagrid.py` é o arquivo principal que contém as classes `Event` e `Datagrid`, juntamente com seus métodos para inserção e remoção de dados, ordenação e busca. Para usar um datagrid, basta referenciá-lo como:
