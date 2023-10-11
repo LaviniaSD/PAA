@@ -909,7 +909,7 @@ class DataGrid():
             event_list (list): lista de eventos a ser analisada
 
         Returns:
-            int: índice do elemento mediano
+            Event: o elemento mediano
         """
 
         def __insertion_sort(event_list):
@@ -994,7 +994,6 @@ class DataGrid():
         """Encontra o k-ésimo menor elemento do DataGrid através do algoritmo de Quick Select
         
         Args:
-            datagrid (DataGrid): DataGrid a ser analisado
             low (int): índice inicial do intervalo
             high (int): índice final do intervalo
             k (int): índice do elemento procurado
@@ -1020,13 +1019,13 @@ class DataGrid():
             return self.__quickselect(pivot_index+1, high, k, strategy=strategy)
 
     @timeit
-    def select_count(self, i, j, strategy="quickselect"):
+    def select_count(self, i, j, strategy="order_and_select"):
         """Seleciona um intervalo de entradas do DataGrid com base na coluna count ordenada de forma crescente.
 
         Args:
             i (int): índice inicial do intervalo
             j (int): índice final do intervalo
-            strategy (str, optional): Estratégia de seleção. Defaults to "quickselect".
+            strategy (str, optional): Estratégia de seleção. Defaults to "order_and_select".
 
         Returns:
             DataGrid: Novo DataGrid contendo os Events que correspondem ao intervalo.
