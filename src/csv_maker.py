@@ -1,10 +1,13 @@
 # Importe as bibliotecas necessárias
-import numpy as np
-import pandas as pd
+import nltk
 import random
 import string
+
+import numpy as np
+import pandas as pd
+
 from datetime import datetime
-import nltk
+
 # Certifique-se de baixar os recursos necessários do NLTK
 nltk.download('words')
 from nltk.corpus import words
