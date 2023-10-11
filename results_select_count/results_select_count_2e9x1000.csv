@@ -1,0 +1,25 @@
+Tamanho da amostra,Estratégia,Tempo de execução (ns)
+2,order_and_select,5189.15
+2,quickselect,31961.7
+2,quickselect_median_of_medians,45118.3
+4,order_and_select,15098.45
+4,quickselect,40139.2
+4,quickselect_median_of_medians,46402.6
+8,order_and_select,15703.9
+8,quickselect,106303.7
+8,quickselect_median_of_medians,147622.7
+16,order_and_select,35880.3
+16,quickselect,115526.6
+16,quickselect_median_of_medians,98790.8
+32,order_and_select,81603.5
+32,quickselect,127215.1
+32,quickselect_median_of_medians,200975.4
+128,order_and_select,361469.4
+128,quickselect,686711.3
+128,quickselect_median_of_medians,860385.8
+256,order_and_select,868773.0
+256,quickselect,1664351.5
+256,quickselect_median_of_medians,1873863.7
+512,order_and_select,2315884.65
+512,quickselect,5118955.7
+512,quickselect_median_of_medians,6177625.8
